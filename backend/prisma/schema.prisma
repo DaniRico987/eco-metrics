@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Company {
+  id             String @id @default(uuid())
+  name           String
+  sector         String
+  employeesCount Int
+
+  users         User[]
+  impactRecords ImpactRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(USER)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  records ImpactRecord[] @relation("CreatedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ImpactRecord {
+  id    String @id @default(uuid())
+  month Int
+  year  Int
+
+  energyKwh   Decimal
+  waterM3     Decimal
+  wasteKg     Decimal
+  transportKm Decimal
+
+  totalImpact Decimal
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, month, year])
+}

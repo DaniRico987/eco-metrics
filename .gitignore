@@ -1,0 +1,22 @@
+# Common
+node_modules/
+dist/
+build/
+.env
+.env.local
+.DS_Store
+*.log
+npm-debug.log*
+
+# Backend specific
+backend/dist/
+backend/node_modules/
+backend/prisma/generated/
+backend/.env
+
+# Frontend specific
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.vscode/

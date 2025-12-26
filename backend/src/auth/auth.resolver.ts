@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthPayload } from './models/auth-payload.model';
 import { LoginInput } from './dto/login.input';
 import { RegisterInput } from './dto/register.input';
+import { RegisterCompanyInput } from './dto/register-company.input';
 
 @Resolver()
 export class AuthResolver {
@@ -16,5 +17,10 @@ export class AuthResolver {
   @Mutation(() => AuthPayload)
   async register(@Args('data') data: RegisterInput) {
     return this.authService.register(data);
+  }
+
+  @Mutation(() => AuthPayload)
+  async registerCompany(@Args('data') data: RegisterCompanyInput) {
+    return this.authService.registerCompany(data);
   }
 }

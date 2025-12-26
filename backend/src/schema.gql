@@ -1,0 +1,122 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AdminCreateInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+type AuthPayload {
+  accessToken: String!
+  user: UserPayload!
+}
+
+type Company {
+  createdAt: DateTime!
+  employeesCount: Int!
+  id: ID!
+  name: String!
+  sector: String!
+  updatedAt: DateTime!
+}
+
+input CompanyCreateInput {
+  employeesCount: Int!
+  name: String!
+  sector: String!
+}
+
+input CreateImpactRecordInput {
+  energyKwh: Float!
+  month: Int!
+  transportKm: Float!
+  wasteKg: Float!
+  waterM3: Float!
+  year: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ImpactRecord {
+  createdAt: DateTime!
+  energyKwh: Float!
+  id: String!
+  month: Int!
+  totalImpact: Float!
+  transportKm: Float!
+  wasteKg: Float!
+  waterM3: Float!
+  year: Int!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  approveUser(userId: String!): User!
+  createImpactRecord(data: CreateImpactRecordInput!): ImpactRecord!
+  login(data: LoginInput!): AuthPayload!
+  register(data: RegisterInput!): AuthPayload!
+  registerCompany(data: RegisterCompanyInput!): AuthPayload!
+  rejectUser(userId: String!): User!
+}
+
+type Query {
+  impactRecord(id: String!): ImpactRecord!
+  impactRecords: [ImpactRecord!]!
+  me: User!
+  myCompany: Company!
+  pendingUsers: [User!]!
+  users: [User!]!
+  usersByCompany: [User!]!
+}
+
+input RegisterCompanyInput {
+  admin: AdminCreateInput!
+  company: CompanyCreateInput!
+}
+
+input RegisterInput {
+  companyId: String!
+  email: String!
+  name: String!
+  password: String!
+}
+
+enum Role {
+  COMPANY_MANAGER
+  SUPER_ADMIN
+  USER
+}
+
+type User {
+  companyId: String!
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+  role: Role!
+  status: UserStatus!
+  updatedAt: DateTime!
+}
+
+type UserPayload {
+  companyId: String!
+  email: String!
+  id: String!
+  role: String!
+  status: String!
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  REJECTED
+}

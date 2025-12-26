@@ -13,6 +13,9 @@ class UserPayload {
 
   @Field()
   companyId: string;
+
+  @Field()
+  status: string;
 }
 
 @ObjectType()

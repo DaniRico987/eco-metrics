@@ -2,7 +2,9 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
+import { Role, UserStatus } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,10 +38,46 @@ export class AuthService {
         email: data.email,
         password: hashedPassword,
         companyId: data.companyId,
+        role: Role.USER,
+        status: UserStatus.PENDING,
       },
     });
 
     return this.signToken(user);
+  }
+
+  async registerCompany(data: {
+    company: { name: string; sector: string; employeesCount: number };
+    admin: { name: string; email: string; password: string };
+  }) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.admin.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already in use');
+    }
+
+    const hashedPassword = await bcrypt.hash(data.admin.password, 10);
+
+    return this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.create({
+        data: data.company,
+      });
+
+      const user = await tx.user.create({
+        data: {
+          name: data.admin.name,
+          email: data.admin.email,
+          password: hashedPassword,
+          companyId: company.id,
+          role: Role.COMPANY_MANAGER,
+          status: UserStatus.ACTIVE,
+        },
+      });
+
+      return this.signToken(user);
+    });
   }
 
   async login(email: string, password: string) {
@@ -49,6 +87,10 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.status === UserStatus.REJECTED) {
+      throw new ForbiddenException('Your access request has been rejected');
     }
 
     const isValid = await bcrypt.compare(password, user.password);
@@ -65,6 +107,7 @@ export class AuthService {
     email: string;
     role: string;
     companyId: string;
+    status: UserStatus;
   }) {
     return {
       accessToken: this.jwtService.sign({
@@ -78,6 +121,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         companyId: user.companyId,
+        status: user.status,
       },
     };
   }

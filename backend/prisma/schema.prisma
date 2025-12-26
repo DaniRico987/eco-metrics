@@ -7,8 +7,15 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
+  SUPER_ADMIN
+  COMPANY_MANAGER
   USER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REJECTED
 }
 
 model Company {
@@ -25,11 +32,12 @@ model Company {
 }
 
 model User {
-  id       String @id @default(uuid())
+  id       String     @id @default(uuid())
   name     String
-  email    String @unique
+  email    String     @unique
   password String
-  role     Role   @default(USER)
+  role     Role       @default(USER)
+  status   UserStatus @default(PENDING)
 
   companyId String
   company   Company @relation(fields: [companyId], references: [id])

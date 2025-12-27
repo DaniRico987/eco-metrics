@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateImpactRecordInput } from './dto/create-impact-record.input';
 
@@ -14,20 +18,29 @@ export class ImpactRecordService {
     const totalImpact =
       input.energyKwh + input.waterM3 + input.wasteKg + input.transportKm;
 
-    return this.prisma.impactRecord.create({
-      data: {
-        ...input,
-        totalImpact,
-        companyId,
-        createdById: userId,
-      },
-    });
+    try {
+      return await this.prisma.impactRecord.create({
+        data: {
+          ...input,
+          totalImpact,
+          companyId,
+          createdById: userId,
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          `Ya existe un registro de impacto para el periodo ${input.month}/${input.year}.`,
+        );
+      }
+      throw error;
+    }
   }
 
   async findAllByCompany(companyId: string) {
     return this.prisma.impactRecord.findMany({
       where: { companyId },
-      orderBy: { year: 'desc' },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
   }
 

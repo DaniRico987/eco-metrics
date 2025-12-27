@@ -13,12 +13,20 @@ import {
   Menu,
   X,
   Loader2,
+  Zap,
+  Droplets,
+  Trash2,
+  Activity,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 import { Auth } from "./pages/Auth/Auth";
 import { Management } from "./pages/Management/Management";
 import { ImpactEntry } from "./pages/Impact/ImpactEntry";
 import { GET_IMPACT_RECORDS } from "./graphql/impactQueries";
 import { useQuery } from "@apollo/client";
+import { EcoInsights } from "./components/EcoInsights";
+import { ImpactPulse } from "./components/ImpactPulse";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -269,14 +277,15 @@ function App() {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : records.length > 0 ? (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="space-y-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                       <StatCard
                         title="Impacto Total"
                         value={`${Number(latestRecord.totalImpact).toFixed(
                           1
                         )} ptos`}
                         color="var(--primary)"
+                        icon={Activity}
                         trend={calculateTrend(
                           Number(latestRecord.totalImpact),
                           Number(previousRecord?.totalImpact)
@@ -286,6 +295,7 @@ function App() {
                         title="Energía"
                         value={`${latestRecord.energyKwh} kWh`}
                         color="#fbbf24"
+                        icon={Zap}
                         trend={calculateTrend(
                           latestRecord.energyKwh,
                           previousRecord?.energyKwh
@@ -295,6 +305,7 @@ function App() {
                         title="Agua"
                         value={`${latestRecord.waterM3} m³`}
                         color="#3b82f6"
+                        icon={Droplets}
                         trend={calculateTrend(
                           latestRecord.waterM3,
                           previousRecord?.waterM3
@@ -304,6 +315,7 @@ function App() {
                         title="Residuos"
                         value={`${latestRecord.wasteKg} kg`}
                         color="#ef4444"
+                        icon={Trash2}
                         trend={calculateTrend(
                           latestRecord.wasteKg,
                           previousRecord?.wasteKg
@@ -311,41 +323,68 @@ function App() {
                       />
                     </div>
 
-                    <div className="card mt-8 p-8">
-                      <h3 className="text-xl font-bold mb-6">
-                        Historial Reciente
-                      </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      <div className="lg:col-span-2">
+                        <EcoInsights records={records} />
+                      </div>
+                      <div className="lg:col-span-1 h-full">
+                        <ImpactPulse
+                          score={Math.max(
+                            0,
+                            Math.min(
+                              100,
+                              100 - Number(latestRecord.totalImpact) * 2
+                            )
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="card p-8">
+                      <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-xl font-bold">
+                          Historial de Impacto
+                        </h3>
+                        <div className="flex gap-2">
+                          {/* Decorative chart indicators */}
+                          <div className="w-2 h-2 rounded-full bg-primary" />
+                          <div className="w-2 h-2 rounded-full bg-amber-400" />
+                          <div className="w-2 h-2 rounded-full bg-blue-400" />
+                        </div>
+                      </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left">
                           <thead className="border-b border-white/5">
                             <tr className="text-text-secondary text-sm font-bold uppercase tracking-wider">
-                              <th className="pb-4 px-4 font-bold">Periodo</th>
-                              <th className="pb-4 px-4 font-bold">Energía</th>
-                              <th className="pb-4 px-4 font-bold">Agua</th>
-                              <th className="pb-4 px-4 font-bold">Residuos</th>
-                              <th className="pb-4 px-4 font-bold">Total</th>
+                              <th className="pb-4 px-4">Periodo</th>
+                              <th className="pb-4 px-4 text-center">Energía</th>
+                              <th className="pb-4 px-4 text-center">Agua</th>
+                              <th className="pb-4 px-4 text-center">
+                                Residuos
+                              </th>
+                              <th className="pb-4 px-4 text-right">Total</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
                             {records.map((r: any) => (
                               <tr
                                 key={r.id}
-                                className="hover:bg-white/[0.02] transition-colors"
+                                className="hover:bg-white/[0.02] transition-colors group"
                               >
                                 <td className="py-4 px-4 font-semibold">
                                   {r.month}/{r.year}
                                 </td>
-                                <td className="py-4 px-4 text-text-secondary">
+                                <td className="py-4 px-4 text-text-secondary text-center">
                                   {r.energyKwh} kWh
                                 </td>
-                                <td className="py-4 px-4 text-text-secondary">
+                                <td className="py-4 px-4 text-text-secondary text-center">
                                   {r.waterM3} m³
                                 </td>
-                                <td className="py-4 px-4 text-text-secondary">
+                                <td className="py-4 px-4 text-text-secondary text-center">
                                   {r.wasteKg} kg
                                 </td>
-                                <td className="py-4 px-4">
-                                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black">
+                                <td className="py-4 px-4 text-right">
+                                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black group-hover:scale-110 inline-block transition-transform">
                                     {Number(r.totalImpact).toFixed(1)} ptos
                                   </span>
                                 </td>
@@ -355,7 +394,7 @@ function App() {
                         </table>
                       </div>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <div className="card mt-8 p-12 border-dashed flex flex-col items-center justify-center text-center bg-white/[0.02]">
                     <div className="bg-white/5 p-4 rounded-full mb-4">
@@ -407,7 +446,8 @@ function App() {
   );
 }
 
-function StatCard({ title, value, color, trend }: any) {
+function StatCard({ title, value, color, trend, icon: Icon }: any) {
+  const isReduction = trend.startsWith("-");
   return (
     <div className="card relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300">
       <div
@@ -415,18 +455,35 @@ function StatCard({ title, value, color, trend }: any) {
         style={{ backgroundColor: color }}
       />
       <div className="flex justify-between items-start mb-4">
-        <p className="text-sm font-semibold text-text-secondary uppercase tracking-tight">
-          {title}
-        </p>
-        <span
-          className={`text-xs font-bold px-2 py-1 rounded-full ${
-            trend.startsWith("-")
-              ? "bg-green-500/10 text-green-400"
-              : "bg-red-500/10 text-red-400"
-          }`}
-        >
-          {trend}
-        </span>
+        <div className="flex items-center gap-2">
+          {Icon && (
+            <div
+              className="p-2 rounded-lg bg-white/5 transition-colors group-hover:bg-white/10"
+              style={{ color }}
+            >
+              <Icon className="w-4 h-4" />
+            </div>
+          )}
+          <p className="text-sm font-semibold text-text-secondary uppercase tracking-tight">
+            {title}
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1 mt-1">
+          <span
+            className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+              isReduction
+                ? "bg-green-500/10 text-green-400"
+                : "bg-red-500/10 text-red-400"
+            }`}
+          >
+            {isReduction ? (
+              <TrendingDown className="w-3 h-3" />
+            ) : (
+              <TrendingUp className="w-3 h-3" />
+            )}
+            {trend}
+          </span>
+        </div>
       </div>
       <h4 className="text-3xl font-extrabold">{value}</h4>
     </div>

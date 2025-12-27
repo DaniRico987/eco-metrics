@@ -29,10 +29,14 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+import { BrowserRouter } from "react-router-dom";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ApolloProvider client={client}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </ApolloProvider>
   </StrictMode>
 );

@@ -26,3 +26,31 @@ export const GET_IMPACT_RECORDS = gql`
     }
   }
 `;
+
+export const GET_DASHBOARD_DATA = gql`
+  query GetDashboardData {
+    impactRecords {
+      id
+      month
+      year
+      energyKwh
+      waterM3
+      wasteKg
+      transportKm
+      totalImpact
+      createdAt
+    }
+    myCompany {
+      id
+      name
+      sector
+      employeesCount
+    }
+    myCompanyGoals {
+      id
+      category
+      target
+      year
+    }
+  }
+`;

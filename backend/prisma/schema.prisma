@@ -26,6 +26,7 @@ model Company {
 
   users         User[]
   impactRecords ImpactRecord[]
+  goals         Goal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,4 +71,26 @@ model ImpactRecord {
   updatedAt DateTime @updatedAt
 
   @@unique([companyId, month, year])
+}
+
+enum GoalCategory {
+  ENERGY
+  WATER
+  WASTE
+  TRANSPORT
+}
+
+model Goal {
+  id       String       @id @default(uuid())
+  category GoalCategory
+  target   Decimal // Valor objetivo (ej: 400 kWh)
+  year     Int
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, category, year])
 }

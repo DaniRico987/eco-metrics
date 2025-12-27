@@ -10,6 +10,8 @@ import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
 import { ImpactRecordModule } from './impact-record/impact-record.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { GoalsModule } from './goals/goals.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { PrismaModule } from './prisma/prisma.module';
     CompaniesModule,
     ImpactRecordModule,
     PrismaModule,
+    GoalsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

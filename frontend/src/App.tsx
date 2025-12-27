@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Leaf,
-  BarChart3,
   LogOut,
   User as UserIcon,
   ShieldCheck,
@@ -12,32 +11,37 @@ import {
   ChevronRight,
   Menu,
   X,
-  Loader2,
-  Zap,
-  Droplets,
-  Trash2,
-  Activity,
-  TrendingDown,
-  TrendingUp,
+  FileText,
 } from "lucide-react";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Link,
+} from "react-router-dom";
 import { Auth } from "./pages/Auth/Auth";
 import { Management } from "./pages/Management/Management";
 import { ImpactEntry } from "./pages/Impact/ImpactEntry";
-import { GET_IMPACT_RECORDS } from "./graphql/impactQueries";
+import { Dashboard } from "./pages/Dashboard/Dashboard";
+import { Profile } from "./pages/Profile/Profile";
+import { Reports } from "./pages/Reports/Reports";
+import { GET_DASHBOARD_DATA } from "./graphql/impactQueries";
 import { useQuery } from "@apollo/client";
-import { EcoInsights } from "./components/EcoInsights";
-import { ImpactPulse } from "./components/ImpactPulse";
+import { AiChat } from "./components/AiChat";
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<
-    "dashboard" | "management" | "impact"
-  >("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatContext, setChatContext] = useState({ type: "", content: "" });
 
-  const { data: impactData, loading: loadingImpact } = useQuery(
-    GET_IMPACT_RECORDS,
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { data: dashboardData, loading: loadingImpact } = useQuery(
+    GET_DASHBOARD_DATA,
     {
       skip: !token || user?.status === "PENDING",
     }
@@ -64,6 +68,7 @@ function App() {
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    navigate("/");
   };
 
   if (!token) {
@@ -97,19 +102,25 @@ function App() {
 
   const menuItems = [
     {
-      id: "dashboard",
+      path: "/",
       label: "Dashboard",
       icon: LayoutDashboard,
       roles: ["USER", "COMPANY_MANAGER", "SUPER_ADMIN"],
     },
     {
-      id: "impact",
+      path: "/impact",
       label: "Cargar Datos",
       icon: PlusCircle,
       roles: ["USER", "COMPANY_MANAGER"],
     },
     {
-      id: "management",
+      path: "/reports",
+      label: "Reportes",
+      icon: FileText,
+      roles: ["USER", "COMPANY_MANAGER", "SUPER_ADMIN"],
+    },
+    {
+      path: "/management",
       label: "Gestionar Equipo",
       icon: UsersIcon,
       roles: ["COMPANY_MANAGER", "SUPER_ADMIN"],
@@ -120,15 +131,13 @@ function App() {
     item.roles.includes(user?.role)
   );
 
-  const records = impactData?.impactRecords || [];
-  const latestRecord = records[0];
-  const previousRecord = records[1];
+  const records = [...(dashboardData?.impactRecords || [])].sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    return b.month - a.month;
+  });
 
-  const calculateTrend = (current: number, previous: number) => {
-    if (!previous) return "0%";
-    const diff = ((current - previous) / previous) * 100;
-    return `${diff > 0 ? "+" : ""}${diff.toFixed(0)}%`;
-  };
+  const myCompany = dashboardData?.myCompany;
+  const goals = dashboardData?.myCompanyGoals || [];
 
   return (
     <div className="min-h-screen flex bg-bg-dark text-text-primary">
@@ -151,7 +160,7 @@ function App() {
                   <div className="bg-primary p-2 rounded-lg shadow-lg shadow-primary/20">
                     <Leaf className="text-white w-5 h-5" />
                   </div>
-                  <span className="text-xl font-bold tracking-tight">
+                  <span className="text-xl font-bold tracking-tight text-white">
                     Eco<span className="text-primary">Metrics</span>
                   </span>
                 </motion.div>
@@ -170,42 +179,48 @@ function App() {
           </div>
 
           <nav className="flex-1 space-y-2">
-            {filteredMenu.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
-                className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-200 group relative ${
-                  activeTab === item.id
-                    ? "bg-primary text-white shadow-lg shadow-primary/30"
-                    : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                }`}
-              >
-                <item.icon
-                  className={`w-6 h-6 shrink-0 ${
-                    activeTab === item.id
-                      ? ""
-                      : "group-hover:scale-110 transition-transform"
+            {filteredMenu.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-200 group relative ${
+                    isActive
+                      ? "bg-primary text-white shadow-lg shadow-primary/30"
+                      : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
                   }`}
-                />
-                {isSidebarOpen && (
-                  <span className="font-semibold">{item.label}</span>
-                )}
-                {activeTab === item.id && isSidebarOpen && (
-                  <ChevronRight className="w-4 h-4 ml-auto" />
-                )}
-                {!isSidebarOpen && (
-                  <div className="absolute left-full ml-4 px-2 py-1 bg-bg-surface-glass border border-white/10 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                    {item.label}
-                  </div>
-                )}
-              </button>
-            ))}
+                >
+                  <item.icon
+                    className={`w-6 h-6 shrink-0 ${
+                      isActive
+                        ? ""
+                        : "group-hover:scale-110 transition-transform"
+                    }`}
+                  />
+                  {isSidebarOpen && (
+                    <span className="font-semibold">{item.label}</span>
+                  )}
+                  {isActive && isSidebarOpen && (
+                    <ChevronRight className="w-4 h-4 ml-auto" />
+                  )}
+                  {!isSidebarOpen && (
+                    <div className="absolute left-full ml-4 px-2 py-1 bg-bg-surface-glass border border-white/10 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                      {item.label}
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="pt-4 border-t border-white/5 space-y-2">
-            <div
-              className={`flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 ${
+            <Link
+              to="/profile"
+              className={`flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all group ${
                 !isSidebarOpen && "justify-center"
+              } ${
+                location.pathname === "/profile" ? "ring-2 ring-primary" : ""
               }`}
             >
               <div className="bg-primary/20 p-2 rounded-xl text-primary shrink-0">
@@ -213,7 +228,7 @@ function App() {
               </div>
               {isSidebarOpen && (
                 <div className="overflow-hidden">
-                  <p className="text-sm font-bold truncate">
+                  <p className="text-sm font-bold truncate text-white">
                     {user?.name || "Usuario"}
                   </p>
                   <p className="text-xs text-text-muted truncate">
@@ -221,7 +236,7 @@ function App() {
                   </p>
                 </div>
               )}
-            </div>
+            </Link>
 
             <button
               onClick={handleLogout}
@@ -242,250 +257,49 @@ function App() {
       <main className="flex-1 flex flex-col min-w-0">
         <div className="p-8 lg:p-12 overflow-y-auto h-screen custom-scrollbar">
           <AnimatePresence mode="wait">
-            {activeTab === "dashboard" && (
-              <motion.div
-                key="dashboard"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 text-primary mb-2">
-                      <ShieldCheck className="w-5 h-5" />
-                      <span className="text-sm font-bold uppercase tracking-wider">
-                        Dashboard Corporativo
-                      </span>
-                    </div>
-                    <h1 className="text-4xl font-extrabold mb-1">
-                      Panel de Control
-                    </h1>
-                    <p className="text-text-secondary">
-                      Monitorea el impacto ambiental de tu organización.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab("impact")}
-                    className="btn btn-primary shadow-lg shadow-primary/20 px-6 py-3"
-                  >
-                    + Nuevo Registro
-                  </button>
-                </div>
-
-                {loadingImpact ? (
-                  <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  </div>
-                ) : records.length > 0 ? (
-                  <div className="space-y-10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                      <StatCard
-                        title="Impacto Total"
-                        value={`${Number(latestRecord.totalImpact).toFixed(
-                          1
-                        )} ptos`}
-                        color="var(--primary)"
-                        icon={Activity}
-                        trend={calculateTrend(
-                          Number(latestRecord.totalImpact),
-                          Number(previousRecord?.totalImpact)
-                        )}
-                      />
-                      <StatCard
-                        title="Energía"
-                        value={`${latestRecord.energyKwh} kWh`}
-                        color="#fbbf24"
-                        icon={Zap}
-                        trend={calculateTrend(
-                          latestRecord.energyKwh,
-                          previousRecord?.energyKwh
-                        )}
-                      />
-                      <StatCard
-                        title="Agua"
-                        value={`${latestRecord.waterM3} m³`}
-                        color="#3b82f6"
-                        icon={Droplets}
-                        trend={calculateTrend(
-                          latestRecord.waterM3,
-                          previousRecord?.waterM3
-                        )}
-                      />
-                      <StatCard
-                        title="Residuos"
-                        value={`${latestRecord.wasteKg} kg`}
-                        color="#ef4444"
-                        icon={Trash2}
-                        trend={calculateTrend(
-                          latestRecord.wasteKg,
-                          previousRecord?.wasteKg
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                      <div className="lg:col-span-2">
-                        <EcoInsights records={records} />
-                      </div>
-                      <div className="lg:col-span-1 h-full">
-                        <ImpactPulse
-                          score={Math.max(
-                            0,
-                            Math.min(
-                              100,
-                              100 - Number(latestRecord.totalImpact) * 2
-                            )
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="card p-8">
-                      <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-xl font-bold">
-                          Historial de Impacto
-                        </h3>
-                        <div className="flex gap-2">
-                          {/* Decorative chart indicators */}
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <div className="w-2 h-2 rounded-full bg-amber-400" />
-                          <div className="w-2 h-2 rounded-full bg-blue-400" />
-                        </div>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                          <thead className="border-b border-white/5">
-                            <tr className="text-text-secondary text-sm font-bold uppercase tracking-wider">
-                              <th className="pb-4 px-4">Periodo</th>
-                              <th className="pb-4 px-4 text-center">Energía</th>
-                              <th className="pb-4 px-4 text-center">Agua</th>
-                              <th className="pb-4 px-4 text-center">
-                                Residuos
-                              </th>
-                              <th className="pb-4 px-4 text-right">Total</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-white/5">
-                            {records.map((r: any) => (
-                              <tr
-                                key={r.id}
-                                className="hover:bg-white/[0.02] transition-colors group"
-                              >
-                                <td className="py-4 px-4 font-semibold">
-                                  {r.month}/{r.year}
-                                </td>
-                                <td className="py-4 px-4 text-text-secondary text-center">
-                                  {r.energyKwh} kWh
-                                </td>
-                                <td className="py-4 px-4 text-text-secondary text-center">
-                                  {r.waterM3} m³
-                                </td>
-                                <td className="py-4 px-4 text-text-secondary text-center">
-                                  {r.wasteKg} kg
-                                </td>
-                                <td className="py-4 px-4 text-right">
-                                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black group-hover:scale-110 inline-block transition-transform">
-                                    {Number(r.totalImpact).toFixed(1)} ptos
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="card mt-8 p-12 border-dashed flex flex-col items-center justify-center text-center bg-white/[0.02]">
-                    <div className="bg-white/5 p-4 rounded-full mb-4">
-                      <BarChart3 className="w-10 h-10 text-text-muted" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">
-                      No hay registros suficientes
-                    </h3>
-                    <p className="text-text-secondary max-w-sm mx-auto">
-                      Empieza a registrar el impacto mensual para visualizar
-                      comparativas, tendencias y estadísticas detalladas.
-                    </p>
-                    <button
-                      onClick={() => setActiveTab("impact")}
-                      className="btn glass mt-8 px-6"
-                    >
-                      Empezar ahora
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {activeTab === "management" && (
-              <motion.div
-                key="management"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <Management />
-              </motion.div>
-            )}
-
-            {activeTab === "impact" && (
-              <motion.div
-                key="impact"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <ImpactEntry onSuccess={() => setActiveTab("dashboard")} />
-              </motion.div>
-            )}
+            <Routes location={location} key={location.pathname}>
+              <Route
+                path="/"
+                element={
+                  <Dashboard
+                    records={records}
+                    myCompany={myCompany}
+                    goals={goals}
+                    loadingImpact={loadingImpact}
+                    onAnalyzeMetric={(type, content) => {
+                      setChatContext({ type, content });
+                      setIsChatOpen(true);
+                    }}
+                  />
+                }
+              />
+              <Route path="/management" element={<Management />} />
+              <Route
+                path="/impact"
+                element={<ImpactEntry onSuccess={() => navigate("/")} />}
+              />
+              <Route path="/reports" element={<Reports />} />
+              <Route
+                path="/profile"
+                element={
+                  <Profile
+                    user={user}
+                    company={myCompany}
+                    onLogout={handleLogout}
+                  />
+                }
+              />
+            </Routes>
           </AnimatePresence>
         </div>
       </main>
-    </div>
-  );
-}
 
-function StatCard({ title, value, color, trend, icon: Icon }: any) {
-  const isReduction = trend.startsWith("-");
-  return (
-    <div className="card relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300">
-      <div
-        className="absolute bottom-0 left-0 w-full h-1 transition-all duration-500 group-hover:h-2 opacity-50"
-        style={{ backgroundColor: color }}
+      <AiChat
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        metricType={chatContext.type}
+        initialContext={chatContext.content}
       />
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-2">
-          {Icon && (
-            <div
-              className="p-2 rounded-lg bg-white/5 transition-colors group-hover:bg-white/10"
-              style={{ color }}
-            >
-              <Icon className="w-4 h-4" />
-            </div>
-          )}
-          <p className="text-sm font-semibold text-text-secondary uppercase tracking-tight">
-            {title}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1 mt-1">
-          <span
-            className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-              isReduction
-                ? "bg-green-500/10 text-green-400"
-                : "bg-red-500/10 text-red-400"
-            }`}
-          >
-            {isReduction ? (
-              <TrendingDown className="w-3 h-3" />
-            ) : (
-              <TrendingUp className="w-3 h-3" />
-            )}
-            {trend}
-          </span>
-        </div>
-      </div>
-      <h4 className="text-3xl font-extrabold">{value}</h4>
     </div>
   );
 }

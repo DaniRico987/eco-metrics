@@ -17,6 +17,7 @@ import {
   APPROVE_USER_MUTATION,
   REJECT_USER_MUTATION,
 } from "../../graphql/userQueries";
+import { GoalSettings } from "./GoalSettings";
 
 export const Management: React.FC = () => {
   const { data, loading, error, refetch } = useQuery(GET_USERS_BY_COMPANY);
@@ -138,6 +139,8 @@ export const Management: React.FC = () => {
           </div>
         </section>
       )}
+
+      <GoalSettings />
     </div>
   );
 };

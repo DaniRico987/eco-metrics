@@ -28,6 +28,12 @@ input CompanyCreateInput {
   sector: String!
 }
 
+input CreateGoalInput {
+  category: GoalCategory!
+  target: Float!
+  year: Int!
+}
+
 input CreateImpactRecordInput {
   energyKwh: Float!
   month: Int!
@@ -41,6 +47,23 @@ input CreateImpactRecordInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Goal {
+  category: GoalCategory!
+  companyId: String!
+  createdAt: DateTime!
+  id: ID!
+  target: Float!
+  updatedAt: DateTime!
+  year: Int!
+}
+
+enum GoalCategory {
+  ENERGY
+  TRANSPORT
+  WASTE
+  WATER
+}
 
 type ImpactRecord {
   createdAt: DateTime!
@@ -66,13 +89,16 @@ type Mutation {
   register(data: RegisterInput!): AuthPayload!
   registerCompany(data: RegisterCompanyInput!): AuthPayload!
   rejectUser(userId: String!): User!
+  upsertGoal(data: CreateGoalInput!): Goal!
 }
 
 type Query {
+  getAiInsight(context: String!, prompt: String!): String!
   impactRecord(id: String!): ImpactRecord!
   impactRecords: [ImpactRecord!]!
   me: User!
   myCompany: Company!
+  myCompanyGoals: [Goal!]!
   pendingUsers: [User!]!
   users: [User!]!
   usersByCompany: [User!]!

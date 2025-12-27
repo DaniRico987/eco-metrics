@@ -166,7 +166,7 @@ const UserRow: React.FC<UserRowProps> = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, x: -20 }}
-      className="card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 px-6"
+      className="card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4"
     >
       <div className="flex items-center gap-4">
         <div

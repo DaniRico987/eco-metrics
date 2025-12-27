@@ -56,6 +56,13 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (dashboardData?.me) {
+      setUser(dashboardData.me);
+      localStorage.setItem("user", JSON.stringify(dashboardData.me));
+    }
+  }, [dashboardData]);
+
   const handleLoginSuccess = (newToken: string, newUser: any) => {
     setToken(newToken);
     setUser(newUser);
@@ -140,22 +147,52 @@ function App() {
   const goals = dashboardData?.myCompanyGoals || [];
 
   return (
-    <div className="min-h-screen flex bg-bg-dark text-text-primary">
+    <div className="min-h-screen flex bg-bg-dark text-text-primary relative overflow-hidden">
+      {/* Mobile Toggle Button */}
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className="lg:hidden fixed bottom-6 right-6 z-[60] bg-primary text-white p-4 rounded-full shadow-2xl shadow-primary/40 active:scale-95 transition-transform"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      {/* Sidebar Overlay (Mobile) */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[45]"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <aside
-        className={`glass border-none h-screen sticky top-0 transition-all duration-300 z-50 ${
-          isSidebarOpen ? "w-72" : "w-20"
-        }`}
+        className={`fixed lg:sticky top-0 h-screen transition-all duration-500 ease-in-out z-50 glass border-none overflow-x-hidden
+          ${
+            isSidebarOpen
+              ? "w-72 translate-x-0"
+              : "w-20 lg:w-20 -translate-x-full lg:translate-x-0"
+          }
+        `}
       >
         <div className="flex flex-col h-full p-4">
-          <div className="flex items-center justify-between mb-10 px-2">
-            <AnimatePresence>
+          <div
+            className={`flex items-center mb-10 px-2 min-h-[40px] ${
+              isSidebarOpen ? "justify-between" : "justify-center"
+            }`}
+          >
+            <AnimatePresence mode="wait">
               {isSidebarOpen && (
                 <motion.div
+                  key="logo"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 whitespace-nowrap"
                 >
                   <div className="bg-primary p-2 rounded-lg shadow-lg shadow-primary/20">
                     <Leaf className="text-white w-5 h-5" />
@@ -168,7 +205,7 @@ function App() {
             </AnimatePresence>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 hover:bg-white/5 rounded-xl transition-colors"
+              className="p-2 hover:bg-white/5 rounded-xl transition-colors shrink-0"
             >
               {isSidebarOpen ? (
                 <X className="w-5 h-5" />
@@ -178,18 +215,21 @@ function App() {
             </button>
           </div>
 
-          <nav className="flex-1 space-y-2">
+          <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
             {filteredMenu.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-200 group relative ${
+                  onClick={() =>
+                    window.innerWidth < 1024 && setIsSidebarOpen(false)
+                  }
+                  className={`w-full flex items-center p-3 rounded-2xl transition-all duration-200 group relative truncate ${
                     isActive
                       ? "bg-primary text-white shadow-lg shadow-primary/30"
                       : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                  }`}
+                  } ${isSidebarOpen ? "gap-4" : "justify-center"}`}
                 >
                   <item.icon
                     className={`w-6 h-6 shrink-0 ${
@@ -199,13 +239,16 @@ function App() {
                     }`}
                   />
                   {isSidebarOpen && (
-                    <span className="font-semibold">{item.label}</span>
+                    <span className="font-semibold whitespace-nowrap">
+                      {item.label}
+                    </span>
                   )}
                   {isActive && isSidebarOpen && (
                     <ChevronRight className="w-4 h-4 ml-auto" />
                   )}
                   {!isSidebarOpen && (
-                    <div className="absolute left-full ml-4 px-2 py-1 bg-bg-surface-glass border border-white/10 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                    <div className="hidden lg:block absolute left-full ml-4 px-3 py-2 glass rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1 pointer-events-none transition-all z-50 shadow-2xl">
+                      <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 glass rotate-45 border-r-0 border-b-0" />
                       {item.label}
                     </div>
                   )}
@@ -217,10 +260,15 @@ function App() {
           <div className="pt-4 border-t border-white/5 space-y-2">
             <Link
               to="/profile"
-              className={`flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all group ${
-                !isSidebarOpen && "justify-center"
+              onClick={() =>
+                window.innerWidth < 1024 && setIsSidebarOpen(false)
+              }
+              className={`flex items-center p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all group ${
+                isSidebarOpen ? "gap-3" : "justify-center"
               } ${
-                location.pathname === "/profile" ? "ring-2 ring-primary" : ""
+                location.pathname === "/profile"
+                  ? "border-primary/50 bg-primary/5"
+                  : ""
               }`}
             >
               <div className="bg-primary/20 p-2 rounded-xl text-primary shrink-0">
@@ -240,8 +288,8 @@ function App() {
 
             <button
               onClick={handleLogout}
-              className={`w-full flex items-center gap-4 p-3 rounded-2xl text-red-400 hover:bg-red-400/10 transition-colors ${
-                !isSidebarOpen && "justify-center"
+              className={`w-full flex items-center p-3 rounded-2xl text-red-400 hover:bg-red-400/10 transition-colors ${
+                isSidebarOpen ? "gap-4" : "justify-center"
               }`}
             >
               <LogOut className="w-6 h-6 shrink-0" />
@@ -254,8 +302,8 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <div className="p-8 lg:p-12 overflow-y-auto h-screen custom-scrollbar">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <div className="p-3 sm:p-6 lg:p-8 overflow-y-auto h-full custom-scrollbar">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route

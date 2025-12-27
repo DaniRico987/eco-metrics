@@ -57,7 +57,7 @@ body {
 
 @layer components {
   .glass {
-    @apply bg-bg-surface-glass border border-border backdrop-blur-xl;
+    @apply bg-bg-surface-glass border border-white/5 backdrop-blur-xl;
   }
 
   .card {
@@ -91,4 +91,38 @@ body {
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Global Fix for Recharts Focus/Click Outlines */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-sector,
+.recharts-curve,
+.recharts-active-dot,
+svg {
+  outline: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }

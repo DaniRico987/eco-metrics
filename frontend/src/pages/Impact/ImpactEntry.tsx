@@ -98,7 +98,7 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold mb-2">
           Nuevo Registro de Impacto
@@ -109,8 +109,8 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="card grid grid-cols-2 gap-6 p-8">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="card grid grid-cols-2 gap-4 p-4 sm:p-6">
           <div className="space-y-2">
             <label className="text-sm font-bold text-text-secondary uppercase">
               Mes
@@ -146,7 +146,7 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MetricInput
             label="Energía Eléctrica"
             name="energyKwh"

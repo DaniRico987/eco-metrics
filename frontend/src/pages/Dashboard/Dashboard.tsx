@@ -10,6 +10,10 @@ import {
   TrendingUp,
   BarChart3,
   Loader2,
+  MoreVertical,
+  Download,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import { EcoInsights } from "../../components/EcoInsights";
 import { ImpactPulse } from "../../components/ImpactPulse";
@@ -56,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
     >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-3">
         <div>
           <div className="flex items-center gap-2 text-primary mb-2">
             <ShieldCheck className="w-5 h-5" />
@@ -78,8 +82,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {records.length > 0 ? (
-        <div className="space-y-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard
               title="Impacto Total"
               value={`${Number(latestRecord.totalImpact).toFixed(1)} ptos`}
@@ -122,7 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <EcoInsights
                 records={records}
@@ -145,11 +149,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div className="card p-8">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-bold">Historial de Impacto</h3>
-              <div className="flex gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary" />
-                <div className="w-2 h-2 rounded-full bg-amber-400" />
-                <div className="w-2 h-2 rounded-full bg-blue-400" />
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl font-bold">Historial de Impacto</h3>
+              </div>
+              <div className="relative group">
+                <button className="p-2 hover:bg-white/5 rounded-xl transition-all">
+                  <MoreVertical className="w-5 h-5 text-text-muted" />
+                </button>
+                <div className="absolute right-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all z-50">
+                  <div className="w-48 glass rounded-2xl shadow-2xl overflow-hidden p-2 space-y-1">
+                    <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-xl text-xs font-bold transition-all text-left">
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                      Exportar CSV
+                    </button>
+                    <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-xl text-xs font-bold transition-all text-left">
+                      <Download className="w-4 h-4 text-primary" />
+                      Descargar PDF
+                    </button>
+                    <div className="h-px bg-white/5 my-1" />
+                    <button
+                      onClick={() => navigate("/reports")}
+                      className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-xl text-xs font-bold transition-all text-left"
+                    >
+                      <FileText className="w-4 h-4 text-blue-400" />
+                      Ver Reportes
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="overflow-x-auto">

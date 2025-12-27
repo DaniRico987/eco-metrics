@@ -32,9 +32,9 @@ export const Profile: React.FC<ProfileProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
-          <div className="card p-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <div className="card p-4 sm:p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">Información Personal</h3>
               <button className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors">
@@ -42,7 +42,7 @@ export const Profile: React.FC<ProfileProps> = ({
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="bg-white/5 p-3 rounded-xl text-text-muted">
                   <User className="w-5 h-5" />
@@ -85,7 +85,7 @@ export const Profile: React.FC<ProfileProps> = ({
             </div>
           </div>
 
-          <div className="card p-8 border-dashed border-primary/20 bg-primary/5">
+          <div className="card p-4 sm:p-6 border-dashed border-primary/20 bg-primary/5">
             <h3 className="text-xl font-bold mb-4">Seguridad</h3>
             <p className="text-text-secondary mb-6">
               Manten tu cuenta protegida cambiando tu contraseña regularmente o
@@ -95,8 +95,8 @@ export const Profile: React.FC<ProfileProps> = ({
           </div>
         </div>
 
-        <div className="space-y-8">
-          <div className="card p-8 text-center">
+        <div className="space-y-6">
+          <div className="card p-4 sm:p-6 text-center">
             <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-bg-dark">
               <Building className="w-10 h-10 text-primary" />
             </div>

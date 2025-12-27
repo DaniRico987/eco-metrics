@@ -52,5 +52,12 @@ export const GET_DASHBOARD_DATA = gql`
       target
       year
     }
+    me {
+      id
+      name
+      email
+      role
+      status
+    }
   }
 `;

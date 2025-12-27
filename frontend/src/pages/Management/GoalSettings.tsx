@@ -45,19 +45,19 @@ export const GoalSettings: React.FC = () => {
   const goals = data?.myCompanyGoals || [];
 
   return (
-    <section className="mt-12">
+    <section className="mt-6">
       <div className="flex items-center gap-2 mb-6">
         <Target className="w-6 h-6 text-primary" />
         <h2 className="text-2xl font-bold">Metas Anuales ({currentYear})</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {categories.map((cat) => {
           const currentGoal = goals.find((g: any) => g.category === cat.key);
           return (
             <div
               key={cat.key}
-              className="card p-6 bg-white/[0.02] border-white/5"
+              className="card p-4 sm:p-6 bg-white/[0.02] border-white/5"
             >
               <label className="block text-sm font-bold text-text-secondary uppercase tracking-wider mb-2">
                 Objetivo de {cat.label}

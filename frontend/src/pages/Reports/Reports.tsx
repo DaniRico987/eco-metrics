@@ -49,7 +49,7 @@ export const Reports: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
     >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-3">
         <div>
           <div className="flex items-center gap-2 text-primary mb-2">
             <FileText className="w-5 h-5" />
@@ -75,9 +75,9 @@ export const Reports: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="card p-8">
+          <div className="card p-4 sm:p-6">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" /> Reportes Recientes
             </h3>
@@ -85,11 +85,11 @@ export const Reports: React.FC = () => {
               {reports.map((report) => (
                 <div
                   key={report.id}
-                  className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group gap-4"
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`p-3 rounded-xl ${
+                      className={`p-3 rounded-xl shrink-0 ${
                         report.type === "PDF"
                           ? "bg-red-500/10 text-red-500"
                           : report.type === "Excel"
@@ -105,18 +105,18 @@ export const Reports: React.FC = () => {
                         <FileJson className="w-6 h-6" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-bold">{report.name}</p>
+                    <div className="min-w-0">
+                      <p className="font-bold truncate">{report.name}</p>
                       <p className="text-xs text-text-muted flex items-center gap-1">
                         <Calendar className="w-3 h-3" /> {report.date}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
                     <span className="flex items-center gap-1 text-[10px] font-black uppercase text-green-400 bg-green-400/10 px-2 py-1 rounded-lg">
                       <CheckCircle2 className="w-3 h-3" /> {report.status}
                     </span>
-                    <button className="p-2 hover:bg-primary/20 hover:text-primary rounded-lg transition-all">
+                    <button className="p-2 hover:bg-primary/20 hover:text-primary rounded-lg transition-all ml-auto sm:ml-0">
                       <Download className="w-5 h-5" />
                     </button>
                   </div>
@@ -127,7 +127,7 @@ export const Reports: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="card p-8 bg-primary/5 border-primary/20">
+          <div className="card p-4 sm:p-6 bg-primary/5 border-primary/20">
             <h3 className="text-xl font-bold mb-4">Exportación Programada</h3>
             <p className="text-sm text-text-secondary mb-6 leading-relaxed">
               Configura el envío automático de reportes mensuales a los correos
@@ -136,7 +136,7 @@ export const Reports: React.FC = () => {
             <button className="btn btn-primary w-full">Configurar Envío</button>
           </div>
 
-          <div className="card p-8">
+          <div className="card p-4 sm:p-6">
             <h3 className="text-xl font-bold mb-4">Formatos Disponibles</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">

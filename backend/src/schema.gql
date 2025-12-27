@@ -13,6 +13,11 @@ type AuthPayload {
   user: UserPayload!
 }
 
+input ChatMessageInput {
+  content: String!
+  role: String!
+}
+
 type Company {
   createdAt: DateTime!
   employeesCount: Int!
@@ -93,7 +98,7 @@ type Mutation {
 }
 
 type Query {
-  getAiInsight(context: String!, prompt: String!): String!
+  getAiInsight(context: String!, history: [ChatMessageInput!]!): String!
   impactRecord(id: String!): ImpactRecord!
   impactRecords: [ImpactRecord!]!
   me: User!

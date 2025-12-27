@@ -21,8 +21,8 @@ export class UsersResolver {
   }
 
   @Query(() => User, { name: 'me' })
-  async getMe(@CurrentUser() user: any) {
-    return this.usersService.findOne(user.userId);
+  async getMe(@CurrentUser() user: ICurrentUser) {
+    return this.usersService.findOne(user.id);
   }
 
   @Query(() => [User], { name: 'usersByCompany' })

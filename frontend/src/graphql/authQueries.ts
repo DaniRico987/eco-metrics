@@ -6,6 +6,7 @@ export const LOGIN_MUTATION = gql`
       accessToken
       user {
         id
+        name
         email
         role
         companyId
@@ -20,6 +21,7 @@ export const REGISTER_MUTATION = gql`
       accessToken
       user {
         id
+        name
         email
         role
         companyId
@@ -34,6 +36,7 @@ export const REGISTER_COMPANY_MUTATION = gql`
       accessToken
       user {
         id
+        name
         email
         role
         companyId

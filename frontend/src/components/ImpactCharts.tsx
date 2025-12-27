@@ -59,18 +59,29 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-bg-surface border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
-          <p className="text-sm font-bold mb-2">{label}</p>
+        <div className="glass p-3 rounded-2xl shadow-2xl border-white/10 flex flex-col gap-2 min-w-[120px]">
+          {label && (
+            <p className="text-[10px] font-black uppercase tracking-widest text-text-muted border-b border-white/5 pb-2 mb-1">
+              {label}
+            </p>
+          )}
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center gap-2 text-xs">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-text-secondary uppercase">
-                {entry.name}:
-              </span>
-              <span className="font-bold text-text-primary">
+            <div
+              key={index}
+              className="flex items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+                  style={{
+                    backgroundColor: entry.color || entry.payload.color,
+                  }}
+                />
+                <span className="text-[11px] font-bold text-text-secondary uppercase tracking-tight">
+                  {entry.name}:
+                </span>
+              </div>
+              <span className="font-black text-white text-xs">
                 {entry.value.toFixed(1)}
               </span>
             </div>
@@ -82,11 +93,11 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
   };
 
   return (
-    <div className="space-y-8 mt-12">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="space-y-6 mt-6 select-none">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Trend History Chart */}
-        <div className="card p-6 bg-white/[0.02]">
-          <div className="flex items-center justify-between mb-8">
+        <div className="card p-4 sm:p-6 bg-white/[0.02]">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-xl font-bold">Tendencias Históricas</h3>
               <p className="text-xs text-text-secondary">
@@ -97,7 +108,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
           </div>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chronodata}>
+              <AreaChart data={chronodata} style={{ outline: "none" }}>
                 <defs>
                   <linearGradient id="colorImpact" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -122,7 +133,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip />} cursor={false} />
                 {energyGoal && (
                   <ReferenceLine
                     y={energyGoal}
@@ -143,6 +154,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                   strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#colorImpact)"
+                  activeDot={false}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -150,8 +162,8 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
         </div>
 
         {/* Categories Distribution */}
-        <div className="card p-6 bg-white/[0.02]">
-          <div className="flex items-center justify-between mb-8">
+        <div className="card p-4 sm:p-6 bg-white/[0.02]">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-xl font-bold">Distribución de Impacto</h3>
               <p className="text-xs text-text-secondary">
@@ -159,10 +171,10 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
               </p>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row items-center justify-around h-[300px]">
-            <div className="h-full w-full md:w-1/2">
+          <div className="flex flex-col md:flex-row items-center justify-around gap-8">
+            <div className="h-[300px] w-full md:w-1/2">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart style={{ outline: "none" }}>
                   <Pie
                     data={pieData}
                     cx="50%"
@@ -171,12 +183,17 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                     outerRadius={80}
                     paddingAngle={8}
                     dataKey="value"
+                    isAnimationActive={true}
                   >
                     {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        style={{ outline: "none" }}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -204,8 +221,8 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
       </div>
 
       {/* Comparison Chart */}
-      <div className="card p-6 bg-white/[0.02]">
-        <div className="flex items-center justify-between mb-8">
+      <div className="card p-4 sm:p-6 bg-white/[0.02]">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-xl font-bold">Comparativa de Recursos</h3>
             <p className="text-xs text-text-secondary">
@@ -215,7 +232,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
         </div>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chronodata}>
+            <BarChart data={chronodata} style={{ outline: "none" }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(255,255,255,0.05)"
@@ -234,7 +251,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={false} />
               <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="circle" />
               {waterGoal && (
                 <ReferenceLine
@@ -254,12 +271,14 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                 fill="#fbbf24"
                 radius={[4, 4, 0, 0]}
                 barSize={20}
+                activeBar={false}
               />
               <Bar
                 dataKey="agua"
                 fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
                 barSize={20}
+                activeBar={false}
               />
             </BarChart>
           </ResponsiveContainer>

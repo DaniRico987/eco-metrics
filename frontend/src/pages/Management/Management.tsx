@@ -12,15 +12,18 @@ import {
   Mail,
   Calendar,
 } from "lucide-react";
+import { getReadableErrorMessage } from "../../utils/errorHandler";
 import {
   GET_USERS_BY_COMPANY,
   APPROVE_USER_MUTATION,
   REJECT_USER_MUTATION,
 } from "../../graphql/userQueries";
 import { GoalSettings } from "./GoalSettings";
+import { User, UsersByCompanyData, UserStatus } from "../../types";
 
 export const Management: React.FC = () => {
-  const { data, loading, error, refetch } = useQuery(GET_USERS_BY_COMPANY);
+  const { data, loading, error, refetch } =
+    useQuery<UsersByCompanyData>(GET_USERS_BY_COMPANY);
 
   const [approveUser, { loading: approving }] = useMutation(
     APPROVE_USER_MUTATION,
@@ -59,7 +62,7 @@ export const Management: React.FC = () => {
         <h3 className="text-xl font-bold text-red-400 mb-2">
           Error al cargar usuarios
         </h3>
-        <p className="text-text-secondary">{error.message}</p>
+        <p className="text-text-secondary">{getReadableErrorMessage(error)}</p>
         <button onClick={() => refetch()} className="btn glass mt-6">
           Reintentar
         </button>
@@ -68,9 +71,9 @@ export const Management: React.FC = () => {
   }
 
   const users = data?.usersByCompany || [];
-  const pending = users.filter((u: any) => u.status === "PENDING");
-  const active = users.filter((u: any) => u.status === "ACTIVE");
-  const rejected = users.filter((u: any) => u.status === "REJECTED");
+  const pending = users.filter((u: User) => u.status === UserStatus.PENDING);
+  const active = users.filter((u: User) => u.status === UserStatus.ACTIVE);
+  const rejected = users.filter((u: User) => u.status === UserStatus.REJECTED);
 
   return (
     <div className="space-y-8">
@@ -92,7 +95,7 @@ export const Management: React.FC = () => {
           </div>
           <div className="grid gap-4">
             <AnimatePresence mode="popLayout">
-              {pending.map((user: any) => (
+              {pending.map((user: User) => (
                 <UserRow
                   key={user.id}
                   user={user}
@@ -115,7 +118,7 @@ export const Management: React.FC = () => {
           </span>
         </div>
         <div className="grid gap-4">
-          {active.map((user: any) => (
+          {active.map((user: User) => (
             <UserRow key={user.id} user={user} readonly />
           ))}
           {active.length === 0 && (
@@ -133,7 +136,7 @@ export const Management: React.FC = () => {
             <h2 className="text-xl font-bold">Solicitudes Rechazadas</h2>
           </div>
           <div className="grid gap-4 opacity-70">
-            {rejected.map((user: any) => (
+            {rejected.map((user: User) => (
               <UserRow key={user.id} user={user} onApprove={handleApprove} />
             ))}
           </div>
@@ -146,7 +149,7 @@ export const Management: React.FC = () => {
 };
 
 interface UserRowProps {
-  user: any;
+  user: User;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
   readonly?: boolean;

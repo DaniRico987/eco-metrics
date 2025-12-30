@@ -29,9 +29,10 @@ import { Reports } from "./pages/Reports/Reports";
 import { GET_DASHBOARD_DATA } from "./graphql/impactQueries";
 import { useQuery } from "@apollo/client";
 import { AiChat } from "./components/AiChat";
+import { User, ImpactRecord, DashboardData } from "./types";
 
 function App() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -40,12 +41,10 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: dashboardData, loading: loadingImpact } = useQuery(
-    GET_DASHBOARD_DATA,
-    {
+  const { data: dashboardData, loading: loadingImpact } =
+    useQuery<DashboardData>(GET_DASHBOARD_DATA, {
       skip: !token || user?.status === "PENDING",
-    }
-  );
+    });
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
@@ -63,7 +62,7 @@ function App() {
     }
   }, [dashboardData]);
 
-  const handleLoginSuccess = (newToken: string, newUser: any) => {
+  const handleLoginSuccess = (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem("token", newToken);
@@ -135,15 +134,17 @@ function App() {
   ];
 
   const filteredMenu = menuItems.filter((item) =>
-    item.roles.includes(user?.role)
+    item.roles.includes(user?.role || "")
   );
 
-  const records = [...(dashboardData?.impactRecords || [])].sort((a, b) => {
+  const records: ImpactRecord[] = [
+    ...(dashboardData?.impactRecords || []),
+  ].sort((a, b) => {
     if (a.year !== b.year) return b.year - a.year;
     return b.month - a.month;
   });
 
-  const myCompany = dashboardData?.myCompany;
+  const myCompany = dashboardData?.myCompany || null;
   const goals = dashboardData?.myCompanyGoals || [];
 
   return (

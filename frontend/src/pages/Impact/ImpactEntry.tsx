@@ -15,6 +15,7 @@ import {
   CREATE_IMPACT_RECORD,
   GET_IMPACT_RECORDS,
 } from "../../graphql/impactQueries";
+import { getReadableErrorMessage } from "../../utils/errorHandler";
 
 const MONTHS = [
   "Enero",
@@ -187,7 +188,7 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
 
         {error && (
           <div className="p-4 bg-red-400/10 border border-red-400/20 rounded-2xl text-red-400 text-sm">
-            {error.message}
+            {getReadableErrorMessage(error)}
           </div>
         )}
 

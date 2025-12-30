@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
   Lock,
-  User,
+  User as UserIcon,
   Building2,
   Loader2,
   Briefcase,
@@ -16,9 +16,11 @@ import {
   REGISTER_COMPANY_MUTATION,
   GET_COMPANIES,
 } from "../../graphql/authQueries";
+import { getReadableErrorMessage } from "../../utils/errorHandler";
+import { AuthPayload, Company, User } from "../../types";
 
 interface AuthProps {
-  onLoginSuccess: (token: string, user: any) => void;
+  onLoginSuccess: (token: string, user: User) => void;
 }
 
 export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
@@ -35,9 +37,15 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
 
   const { data: companiesData } = useQuery(GET_COMPANIES);
 
-  const handleAuthComplete = (data: any) => {
+  const handleAuthComplete = (data: {
+    login?: AuthPayload;
+    register?: AuthPayload;
+    registerCompany?: AuthPayload;
+  }) => {
     const result = data.login || data.register || data.registerCompany;
-    onLoginSuccess(result.accessToken, result.user);
+    if (result) {
+      onLoginSuccess(result.accessToken, result.user);
+    }
   };
 
   const [login, { loading: loginLoading, error: loginErr }] = useMutation(
@@ -137,7 +145,7 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                   className="space-y-4"
                 >
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
                     <input
                       required
                       name="name"
@@ -210,7 +218,7 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                     onChange={handleChange}
                   >
                     <option value="">Selecciona tu empresa</option>
-                    {companiesData?.companies.map((c: any) => (
+                    {companiesData?.companies.map((c: Company) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
@@ -250,7 +258,7 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                 animate={{ opacity: 1 }}
                 className="text-red-400 text-sm bg-red-400/10 p-3 rounded-lg border border-red-400/20"
               >
-                {error.message}
+                {getReadableErrorMessage(error)}
               </motion.p>
             )}
 

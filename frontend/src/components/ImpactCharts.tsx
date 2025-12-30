@@ -15,9 +15,12 @@ import {
   ReferenceLine,
 } from "recharts";
 
+import React from "react";
+import { ImpactRecord, Goal } from "../types";
+
 interface ImpactChartsProps {
-  records: any[];
-  goals: any[];
+  records: ImpactRecord[];
+  goals: Goal[];
 }
 
 export const ImpactCharts: React.FC<ImpactChartsProps> = ({
@@ -56,7 +59,20 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
     { name: "Residuos", value: Number(latest.wasteKg), color: "#ef4444" },
   ];
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: Array<{
+      name: string;
+      value: number;
+      color?: string;
+      payload?: { color?: string };
+    }>;
+    label?: string;
+  }) => {
     if (active && payload && payload.length) {
       return (
         <div className="glass p-3 rounded-2xl shadow-2xl border-white/10 flex flex-col gap-2 min-w-[120px]">
@@ -65,7 +81,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
               {label}
             </p>
           )}
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <div
               key={index}
               className="flex items-center justify-between gap-4"
@@ -74,7 +90,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                 <div
                   className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]"
                   style={{
-                    backgroundColor: entry.color || entry.payload.color,
+                    backgroundColor: entry.color || entry.payload?.color,
                   }}
                 />
                 <span className="text-[11px] font-bold text-text-secondary uppercase tracking-tight">

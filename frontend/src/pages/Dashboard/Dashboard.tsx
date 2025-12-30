@@ -19,11 +19,12 @@ import { EcoInsights } from "../../components/EcoInsights";
 import { ImpactPulse } from "../../components/ImpactPulse";
 import { ImpactCharts } from "../../components/ImpactCharts";
 import { useNavigate } from "react-router-dom";
+import { ImpactRecord, Company, Goal } from "../../types";
 
 interface DashboardProps {
-  records: any[];
-  myCompany: any;
-  goals: any[];
+  records: ImpactRecord[];
+  myCompany: Company | null;
+  goals: Goal[];
   loadingImpact: boolean;
   onAnalyzeMetric: (type: string, content: string) => void;
 }
@@ -190,7 +191,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {records.map((r: any) => (
+                  {records.map((r: ImpactRecord) => (
                     <tr
                       key={r.id}
                       className="hover:bg-white/[0.02] transition-colors group"
@@ -243,7 +244,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
   );
 };
 
-function StatCard({ title, value, color, trend, icon: Icon }: any) {
+interface StatCardProps {
+  title: string;
+  value: string;
+  color: string;
+  trend: string;
+  icon: React.ElementType;
+}
+
+function StatCard({ title, value, color, trend, icon: Icon }: StatCardProps) {
   const isReduction = trend.startsWith("-");
   return (
     <div className="card relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300">

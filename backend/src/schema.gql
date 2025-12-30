@@ -98,6 +98,7 @@ type Mutation {
 }
 
 type Query {
+  companies: [Company!]!
   getAiInsight(context: String!, history: [ChatMessageInput!]!): String!
   impactRecord(id: String!): ImpactRecord!
   impactRecords: [ImpactRecord!]!
@@ -142,6 +143,7 @@ type UserPayload {
   companyId: String!
   email: String!
   id: String!
+  name: String!
   role: String!
   status: String!
 }

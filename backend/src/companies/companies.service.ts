@@ -10,4 +10,10 @@ export class CompaniesService {
       where: { id },
     });
   }
+
+  async findAll() {
+    return this.prisma.company.findMany({
+      orderBy: { name: 'asc' },
+    });
+  }
 }

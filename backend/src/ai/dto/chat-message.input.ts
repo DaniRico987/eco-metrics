@@ -1,9 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql';
+import type { AiRole } from '../ai.service';
 
 @InputType()
 export class ChatMessageInput {
   @Field()
-  role: string; // 'user' | 'assistant' | 'system'
+  role: AiRole;
 
   @Field()
   content: string;

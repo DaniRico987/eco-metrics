@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 
+export type AiRole = 'user' | 'ai' | 'assistant' | 'system';
+
+export interface AiMessage {
+  role: AiRole;
+  content: string;
+}
+
 @Injectable()
 export class AiService {
   private groq: Groq;
@@ -12,7 +19,7 @@ export class AiService {
     });
   }
 
-  async getContextualInsight(history: any[], context: string) {
+  async getContextualInsight(history: AiMessage[], context: string) {
     const chatCompletion = await this.groq.chat.completions.create({
       messages: [
         {
@@ -34,13 +41,12 @@ export class AiService {
           
           REGLA CRÍTICA: Basa tus consejos en los datos del contexto pero prioriza la brevedad y naturalidad.`,
         },
-        ...(history.map((msg) => ({
-          role:
-            msg.role === 'ai' || msg.role === 'assistant'
-              ? 'assistant'
-              : 'user',
+        ...history.map((msg) => ({
+          role: (msg.role === 'ai' || msg.role === 'assistant'
+            ? 'assistant'
+            : 'user') as 'assistant' | 'user',
           content: msg.content,
-        })) as any),
+        })),
       ],
       model: 'llama-3.3-70b-versatile',
     });

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserStatus } from '@prisma/client';
+import { ICurrentUser } from '../common/interfaces/current-user.interface';
 
 @Injectable()
 export class UsersService {
@@ -35,7 +36,11 @@ export class UsersService {
     });
   }
 
-  async updateStatus(userId: string, status: UserStatus, currentManager: any) {
+  async updateStatus(
+    userId: string,
+    status: UserStatus,
+    currentManager: ICurrentUser,
+  ) {
     const userToUpdate = await this.prisma.user.findUnique({
       where: { id: userId },
     });

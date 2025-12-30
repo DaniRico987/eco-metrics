@@ -9,6 +9,9 @@ class UserPayload {
   email: string;
 
   @Field()
+  name: string;
+
+  @Field()
   role: string;
 
   @Field()

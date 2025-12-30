@@ -9,10 +9,12 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { ImpactRecord, Company, Goal } from "../types";
+
 interface EcoInsightsProps {
-  records: any[];
-  company?: any;
-  goals?: any[];
+  records: ImpactRecord[];
+  company?: Company | null;
+  goals?: Goal[];
   onAnalyzeMetric?: (metricType: string, context: string) => void;
 }
 
@@ -176,9 +178,6 @@ export const EcoInsights: React.FC<EcoInsightsProps> = ({
                 title="Consultar con IA"
               >
                 <Sparkles className="w-4 h-4" />
-                <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-bg-surface-glass border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest opacity-0 group-hover/ai:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
-                  Consultar con IA
-                </span>
               </button>
             </div>
           </motion.div>

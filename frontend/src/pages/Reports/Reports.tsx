@@ -11,8 +11,16 @@ import {
   Clock,
 } from "lucide-react";
 
+interface Report {
+  id: number;
+  name: string;
+  date: string;
+  type: "PDF" | "Excel" | "JSON";
+  status: string;
+}
+
 export const Reports: React.FC = () => {
-  const reports = [
+  const reports: Report[] = [
     {
       id: 1,
       name: "Reporte Sostenibilidad Diciembre",
@@ -157,7 +165,7 @@ export const Reports: React.FC = () => {
   );
 };
 
-function PlusCircleIcon({ className }: any) {
+function PlusCircleIcon({ className }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

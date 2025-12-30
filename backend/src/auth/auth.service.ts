@@ -104,6 +104,7 @@ export class AuthService {
 
   private signToken(user: {
     id: string;
+    name: string;
     email: string;
     role: string;
     companyId: string;
@@ -118,6 +119,7 @@ export class AuthService {
       }),
       user: {
         id: user.id,
+        name: user.name,
         email: user.email,
         role: user.role,
         companyId: user.companyId,

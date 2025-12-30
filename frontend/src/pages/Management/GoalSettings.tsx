@@ -6,6 +6,7 @@ import {
   UPSERT_GOAL_MUTATION,
   GET_MY_COMPANY_GOALS,
 } from "../../graphql/goalQueries";
+import { Goal, GoalCategory } from "../../types";
 
 export const GoalSettings: React.FC = () => {
   const { data, loading: loadingGoals } = useQuery(GET_MY_COMPANY_GOALS);
@@ -13,14 +14,26 @@ export const GoalSettings: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const currentYear = new Date().getFullYear();
-  const categories = [
-    { key: "ENERGY", label: "Energía (kWh)", color: "text-amber-400" },
-    { key: "WATER", label: "Agua (m³)", color: "text-blue-400" },
-    { key: "WASTE", label: "Residuos (kg)", color: "text-emerald-400" },
-    { key: "TRANSPORT", label: "Transporte (km)", color: "text-purple-400" },
+  const categories: { key: GoalCategory; label: string; color: string }[] = [
+    {
+      key: GoalCategory.ENERGY,
+      label: "Energía (kWh)",
+      color: "text-amber-400",
+    },
+    { key: GoalCategory.WATER, label: "Agua (m³)", color: "text-blue-400" },
+    {
+      key: GoalCategory.WASTE,
+      label: "Residuos (kg)",
+      color: "text-emerald-400",
+    },
+    {
+      key: GoalCategory.TRANSPORT,
+      label: "Transporte (km)",
+      color: "text-purple-400",
+    },
   ];
 
-  const handleSave = async (category: string, value: string) => {
+  const handleSave = async (category: GoalCategory, value: string) => {
     if (!value) return;
     try {
       await upsertGoal({
@@ -53,7 +66,9 @@ export const GoalSettings: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {categories.map((cat) => {
-          const currentGoal = goals.find((g: any) => g.category === cat.key);
+          const currentGoal = (goals as Goal[]).find(
+            (g: Goal) => g.category === cat.key
+          );
           return (
             <div
               key={cat.key}

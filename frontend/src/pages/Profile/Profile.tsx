@@ -1,10 +1,19 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Shield, Building, Edit2, LogOut } from "lucide-react";
+import {
+  User as UserIcon,
+  Mail,
+  Shield,
+  Building,
+  Edit2,
+  LogOut,
+} from "lucide-react";
+
+import { User as UserType, Company } from "../../types";
 
 interface ProfileProps {
-  user: any;
-  company: any;
+  user: UserType | null;
+  company: Company | null;
   onLogout: () => void;
 }
 
@@ -22,7 +31,7 @@ export const Profile: React.FC<ProfileProps> = ({
     >
       <div className="flex items-center gap-4 mb-10">
         <div className="bg-primary/10 p-4 rounded-3xl text-primary">
-          <User className="w-8 h-8" />
+          <UserIcon className="w-8 h-8" />
         </div>
         <div>
           <h1 className="text-4xl font-extrabold">Mi Perfil</h1>
@@ -45,7 +54,7 @@ export const Profile: React.FC<ProfileProps> = ({
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="bg-white/5 p-3 rounded-xl text-text-muted">
-                  <User className="w-5 h-5" />
+                  <UserIcon className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-text-muted uppercase tracking-wider">

@@ -17,11 +17,16 @@ export const GET_IMPACT_RECORDS = gql`
       id
       month
       year
-      energyKwh
-      waterM3
-      wasteKg
-      transportKm
       totalImpact
+      values {
+        id
+        amount
+        co2Equivalent
+        metric {
+          name
+          unit
+        }
+      }
       createdAt
     }
   }
@@ -33,11 +38,19 @@ export const GET_DASHBOARD_DATA = gql`
       id
       month
       year
-      energyKwh
-      waterM3
-      wasteKg
-      transportKm
       totalImpact
+      values {
+        id
+        amount
+        co2Equivalent
+        metric {
+          id
+          name
+          unit
+          color
+          icon
+        }
+      }
       createdAt
     }
     myCompany {
@@ -45,10 +58,27 @@ export const GET_DASHBOARD_DATA = gql`
       name
       sector
       employeesCount
+      isConfigured
+      companyMetrics {
+        id
+        metric {
+          id
+          name
+          unit
+          color
+          icon
+        }
+        isActive
+      }
     }
     myCompanyGoals {
       id
-      category
+      metricId
+      metric {
+        id
+        name
+        unit
+      }
       target
       year
     }

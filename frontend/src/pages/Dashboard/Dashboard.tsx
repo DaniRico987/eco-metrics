@@ -3,9 +3,6 @@ import { motion } from "framer-motion";
 import {
   ShieldCheck,
   Activity,
-  Zap,
-  Droplets,
-  Trash2,
   TrendingDown,
   TrendingUp,
   BarChart3,
@@ -14,11 +11,12 @@ import {
   Download,
   FileSpreadsheet,
   FileText,
+  Settings,
 } from "lucide-react";
 import { EcoInsights } from "../../components/EcoInsights";
 import { ImpactPulse } from "../../components/ImpactPulse";
 import { ImpactCharts } from "../../components/ImpactCharts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ImpactRecord, Company, Goal } from "../../types";
 
 interface DashboardProps {
@@ -40,11 +38,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const latestRecord = records[0];
   const previousRecord = records[1];
 
-  const calculateTrend = (current: number, previous: number) => {
-    if (previous === undefined || previous === null || previous === 0)
-      return "0%";
-    const diff = ((current - previous) / previous) * 100;
+  const activeMetrics =
+    myCompany?.companyMetrics?.filter((cm) => cm.isActive) || [];
+
+  const calculateTrend = (metricId: string) => {
+    if (!previousRecord) return "+0%";
+
+    const currentVal =
+      latestRecord?.values.find((v) => v.metricId === metricId)?.amount || 0;
+    const prevVal =
+      previousRecord?.values.find((v) => v.metricId === metricId)?.amount || 0;
+
+    if (prevVal === 0) return "0%";
+    const diff = ((currentVal - prevVal) / prevVal) * 100;
     return `${diff > 0 ? "+" : ""}${diff.toFixed(0)}%`;
+  };
+
+  const getMetricValue = (
+    record: ImpactRecord | undefined,
+    metricId: string
+  ) => {
+    return record?.values.find((v) => v.metricId === metricId)?.amount || 0;
   };
 
   if (loadingImpact) {
@@ -82,6 +96,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </button>
       </div>
 
+      {myCompany && !myCompany.isConfigured && (
+        <div className="mb-8 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-yellow-500/20 rounded-xl text-yellow-500">
+              <Settings className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">
+                Configuración Pendiente
+              </h3>
+              <p className="text-text-secondary">
+                Tu empresa aún no ha seleccionado las métricas de impacto.
+                Configúralas para comenzar a medir.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/onboarding"
+            className="btn bg-yellow-500 hover:bg-yellow-400 text-black font-bold whitespace-nowrap px-6 py-3 rounded-xl"
+          >
+            Configurar Métricas
+          </Link>
+        </div>
+      )}
+
       {records.length > 0 ? (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -90,41 +129,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
               value={`${Number(latestRecord.totalImpact).toFixed(1)} ptos`}
               color="var(--primary)"
               icon={Activity}
-              trend={calculateTrend(
-                Number(latestRecord.totalImpact),
-                Number(previousRecord?.totalImpact)
-              )}
+              trend={(() => {
+                if (!previousRecord) return "0%";
+                const current = Number(latestRecord.totalImpact);
+                const prev = Number(previousRecord.totalImpact);
+                if (prev === 0) return "0%";
+                const diff = ((current - prev) / prev) * 100;
+                return `${diff > 0 ? "+" : ""}${diff.toFixed(0)}%`;
+              })()}
             />
-            <StatCard
-              title="Energía"
-              value={`${latestRecord.energyKwh} kWh`}
-              color="#fbbf24"
-              icon={Zap}
-              trend={calculateTrend(
-                latestRecord.energyKwh,
-                previousRecord?.energyKwh
-              )}
-            />
-            <StatCard
-              title="Agua"
-              value={`${latestRecord.waterM3} m³`}
-              color="#3b82f6"
-              icon={Droplets}
-              trend={calculateTrend(
-                latestRecord.waterM3,
-                previousRecord?.waterM3
-              )}
-            />
-            <StatCard
-              title="Residuos"
-              value={`${latestRecord.wasteKg} kg`}
-              color="#ef4444"
-              icon={Trash2}
-              trend={calculateTrend(
-                latestRecord.wasteKg,
-                previousRecord?.wasteKg
-              )}
-            />
+
+            {activeMetrics.map((cm) => (
+              <StatCard
+                key={cm.id}
+                title={cm.metric.name}
+                value={`${getMetricValue(latestRecord, cm.metricId)} ${
+                  cm.metric.unit
+                }`}
+                color={cm.metric.color || "var(--primary)"}
+                // Lucide icons are React components, harder to map dynamically from string.
+                // Fallback to Zap or generic icon if string not mapped.
+                // For now using generic Activity or similar
+                icon={Activity}
+                trend={calculateTrend(cm.metricId)}
+              />
+            ))}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -146,7 +175,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <ImpactCharts records={records} goals={goals} />
+          <ImpactCharts
+            records={records}
+            goals={goals}
+            activeMetrics={activeMetrics}
+          />
 
           <div className="card p-8">
             <div className="flex items-center justify-between mb-8">
@@ -184,9 +217,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <thead className="border-b border-white/5">
                   <tr className="text-text-secondary text-sm font-bold uppercase tracking-wider">
                     <th className="pb-4 px-4">Periodo</th>
-                    <th className="pb-4 px-4 text-center">Energía</th>
-                    <th className="pb-4 px-4 text-center">Agua</th>
-                    <th className="pb-4 px-4 text-center">Residuos</th>
+                    {activeMetrics.map((cm) => (
+                      <th key={cm.id} className="pb-4 px-4 text-center">
+                        {cm.metric.name}
+                      </th>
+                    ))}
                     <th className="pb-4 px-4 text-right">Total</th>
                   </tr>
                 </thead>
@@ -199,15 +234,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <td className="py-4 px-4 font-semibold">
                         {r.month}/{r.year}
                       </td>
-                      <td className="py-4 px-4 text-text-secondary text-center">
-                        {r.energyKwh} kWh
-                      </td>
-                      <td className="py-4 px-4 text-text-secondary text-center">
-                        {r.waterM3} m³
-                      </td>
-                      <td className="py-4 px-4 text-text-secondary text-center">
-                        {r.wasteKg} kg
-                      </td>
+                      {activeMetrics.map((cm) => (
+                        <td
+                          key={cm.id}
+                          className="py-4 px-4 text-text-secondary text-center"
+                        >
+                          {getMetricValue(r, cm.metricId)} {cm.metric.unit}
+                        </td>
+                      ))}
                       <td className="py-4 px-4 text-right">
                         <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black group-hover:scale-110 inline-block transition-transform">
                           {Number(r.totalImpact).toFixed(1)} ptos

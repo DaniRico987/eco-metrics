@@ -1,21 +1,14 @@
 import React, { useState } from "react";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { motion } from "framer-motion";
-import {
-  Zap,
-  Droplets,
-  Trash2,
-  Truck,
-  Calendar,
-  Send,
-  Loader2,
-  CheckCircle2,
-} from "lucide-react";
+import { Calendar, Send, Loader2, CheckCircle2, Leaf } from "lucide-react";
 import {
   CREATE_IMPACT_RECORD,
   GET_IMPACT_RECORDS,
 } from "../../graphql/impactQueries";
+import { GET_MY_COMPANY } from "../../graphql/companyQueries";
 import { getReadableErrorMessage } from "../../utils/errorHandler";
+import { CompanyMetric } from "../../types";
 
 const MONTHS = [
   "Enero",
@@ -30,20 +23,21 @@ const MONTHS = [
   "Octubre",
   "Noviembre",
   "Diciembre",
+  "Mes 13 (Ajuste)",
 ];
 
 export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
   onSuccess,
 }) => {
+  const { data: companyData, loading: loadingConfig } =
+    useQuery(GET_MY_COMPANY);
+
   const [formData, setFormData] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
-    energyKwh: 0,
-    waterM3: 0,
-    wasteKg: 0,
-    transportKm: 0,
   });
 
+  const [metricValues, setMetricValues] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState(false);
 
   const [createRecord, { loading, error }] = useMutation(CREATE_IMPACT_RECORD, {
@@ -57,17 +51,32 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
     },
   });
 
+  const activeMetrics =
+    companyData?.myCompany?.companyMetrics?.filter(
+      (cm: CompanyMetric) => cm.isActive
+    ) || [];
+
+  const handleMetricChange = (metricId: string, value: string) => {
+    setMetricValues((prev) => ({
+      ...prev,
+      [metricId]: Number(value),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const values = activeMetrics.map((cm: CompanyMetric) => ({
+      metricId: cm.metricId,
+      amount: metricValues[cm.metricId] || 0,
+    }));
+
     await createRecord({
       variables: {
         data: {
           month: Number(formData.month),
           year: Number(formData.year),
-          energyKwh: Number(formData.energyKwh),
-          waterM3: Number(formData.waterM3),
-          wasteKg: Number(formData.wasteKg),
-          transportKm: Number(formData.transportKm),
+          values,
         },
       },
     });
@@ -79,6 +88,14 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  if (loadingConfig) {
+    return (
+      <div className="flex justify-center p-12">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -105,8 +122,8 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
           Nuevo Registro de Impacto
         </h1>
         <p className="text-text-secondary">
-          Ingresa los consumos mensuales de tu organización para calcular tu
-          huella ambiental.
+          Ingresa los consumos mensuales de tu organización para las métricas
+          configuradas.
         </p>
       </div>
 
@@ -148,42 +165,24 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MetricInput
-            label="Energía Eléctrica"
-            name="energyKwh"
-            unit="kWh"
-            icon={<Zap />}
-            value={formData.energyKwh}
-            onChange={handleChange}
-            color="text-yellow-400"
-          />
-          <MetricInput
-            label="Consumo de Agua"
-            name="waterM3"
-            unit="m³"
-            icon={<Droplets />}
-            value={formData.waterM3}
-            onChange={handleChange}
-            color="text-blue-400"
-          />
-          <MetricInput
-            label="Residuos Generados"
-            name="wasteKg"
-            unit="kg"
-            icon={<Trash2 />}
-            value={formData.wasteKg}
-            onChange={handleChange}
-            color="text-red-400"
-          />
-          <MetricInput
-            label="Transporte / Logística"
-            name="transportKm"
-            unit="km"
-            icon={<Truck />}
-            value={formData.transportKm}
-            onChange={handleChange}
-            color="text-emerald-400"
-          />
+          {activeMetrics.map((cm: CompanyMetric) => (
+            <MetricInput
+              key={cm.id}
+              label={cm.metric.name}
+              unit={cm.metric.unit}
+              value={metricValues[cm.metricId] || 0}
+              onChange={(e) => handleMetricChange(cm.metricId, e.target.value)}
+              // Dynamic styling could be improved here based on metric type if we add 'type' to backend
+              color={cm.metric.color || "text-primary"}
+              icon={<Leaf />} // We could map backend icons to Lucide components here
+            />
+          ))}
+          {activeMetrics.length === 0 && (
+            <div className="col-span-2 text-center p-8 border border-dashed border-white/10 rounded-2xl text-text-secondary">
+              No tienes métricas configuradas. Ve a configuración para activar
+              métricas.
+            </div>
+          )}
         </div>
 
         {error && (
@@ -193,9 +192,9 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
         )}
 
         <button
-          disabled={loading}
+          disabled={loading || activeMetrics.length === 0}
           type="submit"
-          className="btn btn-primary w-full py-4 text-lg shadow-xl shadow-primary/20 gap-3"
+          className="btn btn-primary w-full py-4 text-lg shadow-xl shadow-primary/20 gap-3 disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="w-6 h-6 animate-spin" />
@@ -213,7 +212,6 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
 
 interface MetricInputProps {
   label: string;
-  name: string;
   unit: string;
   icon: React.ReactNode;
   value: number;
@@ -223,7 +221,6 @@ interface MetricInputProps {
 
 const MetricInput: React.FC<MetricInputProps> = ({
   label,
-  name,
   unit,
   icon,
   value,
@@ -240,7 +237,6 @@ const MetricInput: React.FC<MetricInputProps> = ({
         required
         type="number"
         step="0.01"
-        name={name}
         className="input pr-16 text-2xl font-black"
         value={value}
         onChange={onChange}

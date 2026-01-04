@@ -12,13 +12,24 @@ export const UserStatus = {
 } as const;
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
 
-export const GoalCategory = {
-  ENERGY: "ENERGY",
-  WATER: "WATER",
-  WASTE: "WASTE",
-  TRANSPORT: "TRANSPORT",
-} as const;
-export type GoalCategory = (typeof GoalCategory)[keyof typeof GoalCategory];
+export interface Metric {
+  id: string;
+  name: string;
+  unit: string;
+  icon?: string;
+  color?: string;
+  description?: string;
+  emissionFactor: number;
+  isActive: boolean;
+}
+
+export interface CompanyMetric {
+  id: string;
+  companyId: string;
+  metricId: string;
+  metric: Metric;
+  isActive: boolean;
+}
 
 export interface User {
   id: string;
@@ -36,19 +47,26 @@ export interface Company {
   name: string;
   sector: string;
   employeesCount: number;
+  isConfigured: boolean;
+  companyMetrics?: CompanyMetric[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ImpactValue {
+  id: string;
+  amount: number;
+  co2Equivalent: number;
+  metricId: string;
+  metric?: Metric;
 }
 
 export interface ImpactRecord {
   id: string;
   month: number;
   year: number;
-  energyKwh: number;
-  waterM3: number;
-  wasteKg: number;
-  transportKm: number;
   totalImpact: number;
+  values: ImpactValue[];
   companyId: string;
   createdAt?: string;
   updatedAt?: string;
@@ -56,7 +74,8 @@ export interface ImpactRecord {
 
 export interface Goal {
   id: string;
-  category: GoalCategory;
+  metricId: string;
+  metric?: Metric;
   target: number;
   year: number;
   companyId: string;

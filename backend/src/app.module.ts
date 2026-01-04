@@ -12,6 +12,7 @@ import { ImpactRecordModule } from './impact-record/impact-record.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { GoalsModule } from './goals/goals.module';
 import { AiModule } from './ai/ai.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AiModule } from './ai/ai.module';
     PrismaModule,
     GoalsModule,
     AiModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -19,9 +19,11 @@ input ChatMessageInput {
 }
 
 type Company {
+  companyMetrics: [CompanyMetric!]
   createdAt: DateTime!
   employeesCount: Int!
   id: ID!
+  isConfigured: Boolean!
   name: String!
   sector: String!
   updatedAt: DateTime!
@@ -33,19 +35,33 @@ input CompanyCreateInput {
   sector: String!
 }
 
+type CompanyMetric {
+  id: ID!
+  isActive: Boolean!
+  metric: Metric!
+  metricId: String!
+}
+
 input CreateGoalInput {
-  category: GoalCategory!
+  metricId: String!
   target: Float!
   year: Int!
 }
 
 input CreateImpactRecordInput {
-  energyKwh: Float!
   month: Int!
-  transportKm: Float!
-  wasteKg: Float!
-  waterM3: Float!
+  values: [MetricValueInput!]!
   year: Int!
+}
+
+input CreateMetricInput {
+  color: String!
+  companyId: String
+  description: String
+  emissionFactor: Float!
+  icon: String!
+  name: String!
+  unit: String!
 }
 
 """
@@ -54,32 +70,31 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Goal {
-  category: GoalCategory!
   companyId: String!
   createdAt: DateTime!
   id: ID!
+  metric: Metric!
+  metricId: String!
   target: Float!
   updatedAt: DateTime!
   year: Int!
 }
 
-enum GoalCategory {
-  ENERGY
-  TRANSPORT
-  WASTE
-  WATER
-}
-
 type ImpactRecord {
   createdAt: DateTime!
-  energyKwh: Float!
   id: String!
   month: Int!
   totalImpact: Float!
-  transportKm: Float!
-  wasteKg: Float!
-  waterM3: Float!
+  values: [ImpactValue!]!
   year: Int!
+}
+
+type ImpactValue {
+  amount: Float!
+  co2Equivalent: Float!
+  id: ID!
+  metric: Metric!
+  metricId: String!
 }
 
 input LoginInput {
@@ -87,13 +102,55 @@ input LoginInput {
   password: String!
 }
 
+type Metric {
+  color: String!
+  description: String
+  emissionFactor: Float!
+  icon: String!
+  id: String!
+  isActive: Boolean!
+  name: String!
+  unit: String!
+}
+
+type MetricRequest {
+  adminNote: String
+  company: Company!
+  createdAt: DateTime!
+  description: String!
+  id: ID!
+  status: MetricRequestStatus!
+  updatedAt: DateTime!
+}
+
+enum MetricRequestStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
+type MetricSuggestion {
+  description: String!
+  emissionFactor: Float!
+  units: [String!]!
+}
+
+input MetricValueInput {
+  amount: Float!
+  metricId: String!
+}
+
 type Mutation {
   approveUser(userId: String!): User!
+  completeOnboarding(metricIds: [String!]!): Company!
   createImpactRecord(data: CreateImpactRecordInput!): ImpactRecord!
+  createMetric(createMetricInput: CreateMetricInput!): Metric!
   login(data: LoginInput!): AuthPayload!
   register(data: RegisterInput!): AuthPayload!
   registerCompany(data: RegisterCompanyInput!): AuthPayload!
   rejectUser(userId: String!): User!
+  requestMetric(description: String!): MetricRequest!
+  toggleMetric(metricId: String!): CompanyMetric!
   upsertGoal(data: CreateGoalInput!): Goal!
 }
 
@@ -103,9 +160,12 @@ type Query {
   impactRecord(id: String!): ImpactRecord!
   impactRecords: [ImpactRecord!]!
   me: User!
+  metric(id: String!): Metric!
+  metrics: [Metric!]!
   myCompany: Company!
   myCompanyGoals: [Goal!]!
   pendingUsers: [User!]!
+  suggestMetricDetails(metricName: String!): MetricSuggestion!
   users: [User!]!
   usersByCompany: [User!]!
 }

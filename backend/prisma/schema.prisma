@@ -18,15 +18,27 @@ enum UserStatus {
   REJECTED
 }
 
+enum MetricRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Company {
   id             String @id @default(uuid())
   name           String
   sector         String
   employeesCount Int
 
-  users         User[]
-  impactRecords ImpactRecord[]
-  goals         Goal[]
+  // New Flag for onboarding
+  isConfigured Boolean @default(false)
+
+  users          User[]
+  impactRecords  ImpactRecord[]
+  goals          Goal[]
+  companyMetrics CompanyMetric[]
+  metricRequests MetricRequest[]
+  customMetrics  Metric[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,32 +52,92 @@ model User {
   role     Role       @default(USER)
   status   UserStatus @default(PENDING)
 
+  // Granular Permission for historical data
+  canBackfill Boolean @default(false)
+
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
-  records ImpactRecord[] @relation("CreatedBy")
+  records ImpactRecord[] @relation("CreatedImpactRecord")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ---------------------------------------------------------
+// DYNAMIC METRICS SYSTEM
+// ---------------------------------------------------------
+
+model Metric {
+  id             String  @id @default(uuid())
+  name           String
+  unit           String
+  description    String? // Detailed information about the metric
+  icon           String // Icon name for Lucid React (e.g. "Zap", "Droplet")
+  color          String // Hex code (e.g. "#FF5733")
+  emissionFactor Float // kg CO2 per unit
+  isActive       Boolean @default(true) // Logical delete
+
+  companyMetrics CompanyMetric[]
+  goals          Goal[]
+  impactValues   ImpactValue[]
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CompanyMetric {
+  id        String @id @default(uuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  metricId String
+  metric   Metric @relation(fields: [metricId], references: [id])
+
+  // Optional overrides if companies want to rename the metric locally?
+  // For now we keep it simple, just a link.
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, metricId])
+}
+
+model MetricRequest {
+  id          String              @id @default(uuid())
+  description String // Detailed request from the manager
+  status      MetricRequestStatus @default(PENDING)
+  adminNote   String? // Feedback from Super Admin
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------
+// IMPACT DATA (ROW-BASED)
+// ---------------------------------------------------------
 
 model ImpactRecord {
   id    String @id @default(uuid())
   month Int
   year  Int
 
-  energyKwh   Decimal
-  waterM3     Decimal
-  wasteKg     Decimal
-  transportKm Decimal
+  totalImpact Decimal // Cache of total CO2 for performance
 
-  totalImpact Decimal
+  values ImpactValue[]
 
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
   createdById String
-  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+  createdBy   User   @relation(fields: [createdById], references: [id], name: "CreatedImpactRecord")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,18 +145,35 @@ model ImpactRecord {
   @@unique([companyId, month, year])
 }
 
-enum GoalCategory {
-  ENERGY
-  WATER
-  WASTE
-  TRANSPORT
+// Breaking relation name to avoid ambiguity
+// Need to add this to User model: records CreatedImpactRecord[]
+// Wait, in User model above I used records CreatedImpactRecord[]
+// But ImpactRecord relation name is "CreatedImpactRecord"
+// So in User: records ImpactRecord[] @relation("CreatedImpactRecord")
+
+model ImpactValue {
+  id            String  @id @default(uuid())
+  amount        Decimal
+  co2Equivalent Decimal // Calculated: amount * metric.emissionFactor
+
+  metricId String
+  metric   Metric @relation(fields: [metricId], references: [id])
+
+  impactRecordId String
+  impactRecord   ImpactRecord @relation(fields: [impactRecordId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Goal {
-  id       String       @id @default(uuid())
-  category GoalCategory
-  target   Decimal // Valor objetivo (ej: 400 kWh)
-  year     Int
+  id     String  @id @default(uuid())
+  target Decimal
+  year   Int
+
+  // Dynamic link to metric
+  metricId String
+  metric   Metric @relation(fields: [metricId], references: [id])
 
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
@@ -92,5 +181,15 @@ model Goal {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([companyId, category, year])
+  @@unique([companyId, metricId, year])
+}
+
+model AiCache {
+  id        String   @id @default(uuid())
+  key       String   @unique // The prompt or a hash of the request
+  response  Json     // The stored AI response
+  type      String   // e.g., 'METRIC_SUGGESTION', 'DASHBOARD_INSIGHT'
+  
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
 }

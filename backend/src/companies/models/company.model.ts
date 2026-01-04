@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { CompanyMetric } from './company-metric.model';
 
 @ObjectType()
 export class Company {
@@ -15,8 +16,14 @@ export class Company {
   employeesCount: number;
 
   @Field()
+  isConfigured: boolean;
+
+  @Field()
   createdAt: Date;
 
   @Field()
   updatedAt: Date;
+
+  @Field(() => [CompanyMetric], { nullable: true })
+  companyMetrics?: CompanyMetric[];
 }

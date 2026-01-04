@@ -5,3 +5,13 @@ export const GET_AI_INSIGHT = gql`
     getAiInsight(history: $history, context: $context)
   }
 `;
+
+export const SUGGEST_METRIC_DETAILS = gql`
+  query SuggestMetricDetails($metricName: String!) {
+    suggestMetricDetails(metricName: $metricName) {
+      units
+      emissionFactor
+      description
+    }
+  }
+`;

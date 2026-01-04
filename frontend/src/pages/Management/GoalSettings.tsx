@@ -1,45 +1,33 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { motion } from "framer-motion";
-import { Target, Save, Loader2, CheckCircle2 } from "lucide-react";
+import { Target, Save, Loader2, CheckCircle2, Leaf } from "lucide-react";
 import {
   UPSERT_GOAL_MUTATION,
   GET_MY_COMPANY_GOALS,
 } from "../../graphql/goalQueries";
-import { Goal, GoalCategory } from "../../types";
+import { GET_MY_COMPANY } from "../../graphql/companyQueries";
+import { Goal } from "../../types";
 
 export const GoalSettings: React.FC = () => {
   const { data, loading: loadingGoals } = useQuery(GET_MY_COMPANY_GOALS);
+  const { data: companyData, loading: loadingCompany } =
+    useQuery(GET_MY_COMPANY);
   const [upsertGoal, { loading: saving }] = useMutation(UPSERT_GOAL_MUTATION);
   const [success, setSuccess] = useState(false);
 
   const currentYear = new Date().getFullYear();
-  const categories: { key: GoalCategory; label: string; color: string }[] = [
-    {
-      key: GoalCategory.ENERGY,
-      label: "Energía (kWh)",
-      color: "text-amber-400",
-    },
-    { key: GoalCategory.WATER, label: "Agua (m³)", color: "text-blue-400" },
-    {
-      key: GoalCategory.WASTE,
-      label: "Residuos (kg)",
-      color: "text-emerald-400",
-    },
-    {
-      key: GoalCategory.TRANSPORT,
-      label: "Transporte (km)",
-      color: "text-purple-400",
-    },
-  ];
+  const activeMetrics =
+    companyData?.myCompany?.companyMetrics?.filter((cm: any) => cm.isActive) ||
+    [];
 
-  const handleSave = async (category: GoalCategory, value: string) => {
+  const handleSave = async (metricId: string, value: string) => {
     if (!value) return;
     try {
       await upsertGoal({
         variables: {
           data: {
-            category,
+            metricId,
             target: parseFloat(value),
             year: currentYear,
           },
@@ -53,7 +41,8 @@ export const GoalSettings: React.FC = () => {
     }
   };
 
-  if (loadingGoals) return <Loader2 className="animate-spin" />;
+  if (loadingGoals || loadingCompany)
+    return <Loader2 className="animate-spin" />;
 
   const goals = data?.myCompanyGoals || [];
 
@@ -65,34 +54,45 @@ export const GoalSettings: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {categories.map((cat) => {
+        {activeMetrics.map((cm: any) => {
           const currentGoal = (goals as Goal[]).find(
-            (g: Goal) => g.category === cat.key
+            (g: Goal) => g.metricId === cm.metricId && g.year === currentYear
           );
           return (
             <div
-              key={cat.key}
+              key={cm.id}
               className="card p-4 sm:p-6 bg-white/[0.02] border-white/5"
             >
-              <label className="block text-sm font-bold text-text-secondary uppercase tracking-wider mb-2">
-                Objetivo de {cat.label}
-              </label>
+              <div className="flex items-center gap-2 mb-2">
+                {/* Generic icon since we don't map dynamic icons yet */}
+                <div
+                  className={`p-1.5 rounded-lg bg-white/5 ${
+                    cm.metric.color || "text-primary"
+                  }`}
+                >
+                  <Leaf className="w-4 h-4" />
+                </div>
+                <label className="block text-sm font-bold text-text-secondary uppercase tracking-wider">
+                  Objetivo de {cm.metric.name} ({cm.metric.unit})
+                </label>
+              </div>
+
               <div className="flex gap-3">
                 <input
                   type="number"
                   defaultValue={currentGoal?.target || ""}
                   placeholder="Ej: 500"
                   className="input flex-1"
-                  id={`goal-${cat.key}`}
+                  id={`goal-${cm.metricId}`}
                 />
                 <button
                   onClick={() => {
                     const val = (
                       document.getElementById(
-                        `goal-${cat.key}`
+                        `goal-${cm.metricId}`
                       ) as HTMLInputElement
                     ).value;
-                    handleSave(cat.key, val);
+                    handleSave(cm.metricId, val);
                   }}
                   disabled={saving}
                   className="btn btn-primary px-4"
@@ -107,6 +107,11 @@ export const GoalSettings: React.FC = () => {
             </div>
           );
         })}
+        {activeMetrics.length === 0 && (
+          <div className="col-span-2 text-center p-8 text-text-secondary border border-dashed border-white/10 rounded-xl">
+            No tienes métricas activas para configurar metas.
+          </div>
+        )}
       </div>
 
       {success && (

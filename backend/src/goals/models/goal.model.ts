@@ -1,30 +1,17 @@
-import {
-  ObjectType,
-  Field,
-  ID,
-  registerEnumType,
-  Float,
-  Int,
-} from '@nestjs/graphql';
+import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
 
-export enum GoalCategory {
-  ENERGY = 'ENERGY',
-  WATER = 'WATER',
-  WASTE = 'WASTE',
-  TRANSPORT = 'TRANSPORT',
-}
-
-registerEnumType(GoalCategory, {
-  name: 'GoalCategory',
-});
+import { Metric } from '../../metrics/entities/metric.entity';
 
 @ObjectType()
 export class Goal {
   @Field(() => ID)
   id: string;
 
-  @Field(() => GoalCategory)
-  category: GoalCategory;
+  @Field()
+  metricId: string;
+
+  @Field(() => Metric)
+  metric: Metric;
 
   @Field(() => Float)
   target: number;

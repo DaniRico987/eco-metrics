@@ -15,17 +15,45 @@ export class ImpactRecordService {
     userId: string,
     companyId: string,
   ) {
-    const totalImpact =
-      input.energyKwh + input.waterM3 + input.wasteKg + input.transportKm;
+    const metricIds = input.values.map((v) => v.metricId);
+    const metrics = await this.prisma.metric.findMany({
+      where: { id: { in: metricIds }, isActive: true },
+    });
+
+    if (metrics.length !== metricIds.length) {
+      // Logic to identify which one is missing could be added, or just generic error
+      // Ideally check distinct IDs if input has duplicates?
+      throw new ConflictException('Some metrics are invalid or inactive.');
+    }
+
+    let totalImpact = 0;
+    const valuesData = input.values.map((v) => {
+      const metric = metrics.find((m) => m.id === v.metricId);
+      if (!metric) throw new Error('Metric not found unexpectedly'); // Should be covered by length check
+      const co2Equivalent = v.amount * metric.emissionFactor;
+      totalImpact += co2Equivalent;
+      return {
+        metricId: v.metricId,
+        amount: v.amount,
+        co2Equivalent,
+      };
+    });
 
     try {
       return await this.prisma.impactRecord.create({
         data: {
-          ...input,
+          month: input.month,
+          year: input.year,
           totalImpact,
           companyId,
           createdById: userId,
+          values: {
+            createMany: {
+              data: valuesData,
+            },
+          },
         },
+        include: { values: { include: { metric: true } } },
       });
     } catch (error) {
       if (error.code === 'P2002') {
@@ -40,6 +68,7 @@ export class ImpactRecordService {
   async findAllByCompany(companyId: string) {
     return this.prisma.impactRecord.findMany({
       where: { companyId },
+      include: { values: { include: { metric: true } } },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
   }
@@ -47,6 +76,7 @@ export class ImpactRecordService {
   async findOne(id: string, companyId: string) {
     const record = await this.prisma.impactRecord.findUnique({
       where: { id },
+      include: { values: { include: { metric: true } } },
     });
 
     if (!record || record.companyId !== companyId) {

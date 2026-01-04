@@ -1,4 +1,5 @@
 import React from "react";
+import { useQuery } from "@apollo/client";
 import { motion } from "framer-motion";
 import {
   FileText,
@@ -6,50 +7,68 @@ import {
   Calendar,
   Filter,
   FileSpreadsheet,
-  FileJson,
   CheckCircle2,
   Clock,
+  Loader2,
+  PlusCircle,
 } from "lucide-react";
-
-interface Report {
-  id: number;
-  name: string;
-  date: string;
-  type: "PDF" | "Excel" | "JSON";
-  status: string;
-}
+import { GET_IMPACT_RECORDS } from "../../graphql/impactQueries";
+import { GET_MY_COMPANY } from "../../graphql/companyQueries";
+import { ImpactRecord, CompanyMetric } from "../../types";
 
 export const Reports: React.FC = () => {
-  const reports: Report[] = [
-    {
-      id: 1,
-      name: "Reporte Sostenibilidad Diciembre",
-      date: "27/12/2025",
-      type: "PDF",
-      status: "Listo",
-    },
-    {
-      id: 2,
-      name: "Análisis Hídrico Q4",
-      date: "15/12/2025",
-      type: "Excel",
-      status: "Listo",
-    },
-    {
-      id: 3,
-      name: "Consumo Energético Anual",
-      date: "01/12/2025",
-      type: "PDF",
-      status: "Listo",
-    },
-    {
-      id: 4,
-      name: "Huella de Carbono Mensual",
-      date: "28/11/2025",
-      type: "JSON",
-      status: "Listo",
-    },
-  ];
+  const { data: recordsData, loading: loadingRecords } =
+    useQuery(GET_IMPACT_RECORDS);
+  const { data: companyData, loading: loadingCompany } =
+    useQuery(GET_MY_COMPANY);
+
+  const records: ImpactRecord[] = recordsData?.myImpactRecords || [];
+  const activeMetrics: CompanyMetric[] =
+    companyData?.myCompany?.companyMetrics?.filter((cm: any) => cm.isActive) ||
+    [];
+
+  const generateCSV = (record: ImpactRecord) => {
+    // Headers
+    const headers = [
+      "Periodo",
+      "Impacto Total",
+      ...activeMetrics.map((cm) => `${cm.metric.name} (${cm.metric.unit})`),
+    ];
+
+    // Data Row
+    const row = [
+      `${record.month}/${record.year}`,
+      record.totalImpact.toFixed(2),
+      ...activeMetrics.map((cm) => {
+        const val =
+          record.values.find((v) => v.metricId === cm.metricId)?.amount || 0;
+        return val.toFixed(2);
+      }),
+    ];
+
+    const csvContent = [headers.join(","), row.join(",")].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `reporte_impacto_${record.month}_${record.year}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (loadingRecords || loadingCompany) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -78,7 +97,7 @@ export const Reports: React.FC = () => {
             <Filter className="w-4 h-4" /> Filtrar
           </button>
           <button className="btn btn-primary shadow-lg shadow-primary/20 px-6 py-3 flex items-center gap-2">
-            <PlusCircleIcon className="w-5 h-5" /> Nuevo Reporte
+            <PlusCircle className="w-5 h-5" /> Nuevo Reporte
           </button>
         </div>
       </div>
@@ -87,49 +106,48 @@ export const Reports: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="card p-4 sm:p-6">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" /> Reportes Recientes
+              <Clock className="w-5 h-5 text-primary" /> Reportes Disponibles
             </h3>
             <div className="space-y-4">
-              {reports.map((report) => (
-                <div
-                  key={report.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group gap-4"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`p-3 rounded-xl shrink-0 ${
-                        report.type === "PDF"
-                          ? "bg-red-500/10 text-red-500"
-                          : report.type === "Excel"
-                          ? "bg-green-500/10 text-green-500"
-                          : "bg-blue-500/10 text-blue-500"
-                      }`}
-                    >
-                      {report.type === "PDF" ? (
-                        <FileText className="w-6 h-6" />
-                      ) : report.type === "Excel" ? (
-                        <FileSpreadsheet className="w-6 h-6" />
-                      ) : (
-                        <FileJson className="w-6 h-6" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold truncate">{report.name}</p>
-                      <p className="text-xs text-text-muted flex items-center gap-1">
-                        <Calendar className="w-3 h-3" /> {report.date}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
-                    <span className="flex items-center gap-1 text-[10px] font-black uppercase text-green-400 bg-green-400/10 px-2 py-1 rounded-lg">
-                      <CheckCircle2 className="w-3 h-3" /> {report.status}
-                    </span>
-                    <button className="p-2 hover:bg-primary/20 hover:text-primary rounded-lg transition-all ml-auto sm:ml-0">
-                      <Download className="w-5 h-5" />
-                    </button>
-                  </div>
+              {records.length === 0 ? (
+                <div className="text-center p-8 text-text-secondary">
+                  No hay registros de impacto disponibles para generar reportes.
                 </div>
-              ))}
+              ) : (
+                records.map((report) => (
+                  <div
+                    key={report.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group gap-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl shrink-0 bg-green-500/10 text-green-500">
+                        <FileSpreadsheet className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold truncate">
+                          Reporte Impacto {report.month}/{report.year}
+                        </p>
+                        <p className="text-xs text-text-muted flex items-center gap-1">
+                          <Calendar className="w-3 h-3" /> Generado
+                          automáticamente
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
+                      <span className="flex items-center gap-1 text-[10px] font-black uppercase text-green-400 bg-green-400/10 px-2 py-1 rounded-lg">
+                        <CheckCircle2 className="w-3 h-3" /> Listo
+                      </span>
+                      <button
+                        onClick={() => generateCSV(report)}
+                        className="p-2 hover:bg-primary/20 hover:text-primary rounded-lg transition-all ml-auto sm:ml-0"
+                        title="Descargar CSV"
+                      >
+                        <Download className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -148,11 +166,11 @@ export const Reports: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">Formatos Disponibles</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
-                <span className="text-sm font-semibold">PDF (Premium)</span>
+                <span className="text-sm font-semibold">CSV / Excel</span>
                 <span className="text-xs text-primary font-bold">ACTIVO</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 opacity-50">
-                <span className="text-sm font-semibold">Excel/CSV</span>
+                <span className="text-sm font-semibold">PDF (Corporativo)</span>
                 <span className="text-xs text-text-muted font-bold">
                   PRÓXIMAMENTE
                 </span>
@@ -164,22 +182,3 @@ export const Reports: React.FC = () => {
     </motion.div>
   );
 };
-
-function PlusCircleIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2}
-      stroke="currentColor"
-      className={className}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-      />
-    </svg>
-  );
-}

@@ -16,27 +16,21 @@ import {
 } from "recharts";
 
 import React from "react";
-import { ImpactRecord, Goal } from "../types";
+import { ImpactRecord, Goal, CompanyMetric } from "../types";
 
 interface ImpactChartsProps {
   records: ImpactRecord[];
   goals: Goal[];
+  activeMetrics: CompanyMetric[];
 }
 
 export const ImpactCharts: React.FC<ImpactChartsProps> = ({
   records,
   goals,
+  activeMetrics,
 }) => {
   if (!records || records.length === 0) return null;
-
-  // Get goals for the current year (taking latest record's year as current)
-  const currentYear = records[0]?.year;
-  const energyGoal = goals.find(
-    (g) => g.category === "ENERGY" && g.year === currentYear
-  )?.target;
-  const waterGoal = goals.find(
-    (g) => g.category === "WATER" && g.year === currentYear
-  )?.target;
+  if (!activeMetrics || activeMetrics.length === 0) return null;
 
   // Prepare data for the history chart (Line Chart)
   const chronodata = [...records]
@@ -44,20 +38,40 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
       if (a.year !== b.year) return a.year - b.year;
       return a.month - b.month;
     })
-    .map((r) => ({
-      name: `${r.month}/${r.year}`,
-      energía: Number(r.energyKwh),
-      agua: Number(r.waterM3),
-      residuos: Number(r.wasteKg),
-      total: Number(r.totalImpact),
-    }));
+    .map((r) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dataPoint: any = {
+        name: `${r.month}/${r.year}`,
+        total: Number(r.totalImpact),
+      };
+      activeMetrics.forEach((cm) => {
+        const val =
+          r.values.find((v) => v.metricId === cm.metricId)?.amount || 0;
+        dataPoint[cm.metric.name] = val;
+      });
+      return dataPoint;
+    });
 
   const latest = records[0];
-  const pieData = [
-    { name: "Energía", value: Number(latest.energyKwh), color: "#fbbf24" },
-    { name: "Agua", value: Number(latest.waterM3) * 10, color: "#3b82f6" }, // Scaled for visibility
-    { name: "Residuos", value: Number(latest.wasteKg), color: "#ef4444" },
-  ];
+
+  // Pie data from latest record
+  const pieData = activeMetrics
+    .map((cm) => {
+      const val =
+        latest.values.find((v) => v.metricId === cm.metricId)?.amount || 0;
+      return {
+        name: cm.metric.name,
+        value: val,
+        color: cm.metric.color || "var(--primary)",
+      };
+    })
+    .filter((d) => d.value > 0);
+
+  // Helper to find specific goal
+  const getGoal = (metricId: string) => {
+    return goals.find((g) => g.metricId === metricId && g.year === latest.year)
+      ?.target;
+  };
 
   const CustomTooltip = ({
     active,
@@ -98,7 +112,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                 </span>
               </div>
               <span className="font-black text-white text-xs">
-                {entry.value.toFixed(1)}
+                {Number(entry.value).toFixed(1)}
               </span>
             </div>
           ))}
@@ -117,8 +131,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
             <div>
               <h3 className="text-xl font-bold">Tendencias Históricas</h3>
               <p className="text-xs text-text-secondary">
-                Evolución mensual de consumo energético{" "}
-                {energyGoal && `(Meta: ${energyGoal} kWh)`}
+                Evolución mensual de consumo (Todos los recursos)
               </p>
             </div>
           </div>
@@ -126,10 +139,27 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chronodata} style={{ outline: "none" }}>
                 <defs>
-                  <linearGradient id="colorImpact" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
+                  {activeMetrics.map((cm, i) => (
+                    <linearGradient
+                      key={cm.id}
+                      id={`color${i}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor={cm.metric.color || "var(--primary)"}
+                        stopOpacity={0.3}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor={cm.metric.color || "var(--primary)"}
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  ))}
                 </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -150,28 +180,18 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                   axisLine={false}
                 />
                 <Tooltip content={<CustomTooltip />} cursor={false} />
-                {energyGoal && (
-                  <ReferenceLine
-                    y={energyGoal}
-                    stroke="#ef4444"
-                    strokeDasharray="3 3"
-                    label={{
-                      position: "right",
-                      value: "Meta",
-                      fill: "#ef4444",
-                      fontSize: 10,
-                    }}
+                {activeMetrics.map((cm, i) => (
+                  <Area
+                    key={cm.id}
+                    type="monotone"
+                    dataKey={cm.metric.name}
+                    stroke={cm.metric.color || "var(--primary)"}
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill={`url(#color${i})`}
+                    activeDot={false}
                   />
-                )}
-                <Area
-                  type="monotone"
-                  dataKey="energía"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorImpact)"
-                  activeDot={false}
-                />
+                ))}
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -227,7 +247,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
                     <span className="text-sm font-semibold">{item.name}</span>
                   </div>
                   <span className="text-sm text-text-secondary font-bold">
-                    {item.value.toFixed(0)}
+                    {Number(item.value).toFixed(0)}
                   </span>
                 </div>
               ))}
@@ -242,7 +262,7 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
           <div>
             <h3 className="text-xl font-bold">Comparativa de Recursos</h3>
             <p className="text-xs text-text-secondary">
-              Agua vs Energía a través del tiempo
+              Visión desagregada de todas las métricas activas
             </p>
           </div>
         </div>
@@ -269,33 +289,35 @@ export const ImpactCharts: React.FC<ImpactChartsProps> = ({
               />
               <Tooltip content={<CustomTooltip />} cursor={false} />
               <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="circle" />
-              {waterGoal && (
-                <ReferenceLine
-                  y={waterGoal}
-                  stroke="#3b82f6"
-                  strokeDasharray="5 5"
-                  label={{
-                    position: "top",
-                    value: "Meta Agua",
-                    fill: "#3b82f6",
-                    fontSize: 10,
-                  }}
+
+              {activeMetrics.map((cm) => {
+                const goal = getGoal(cm.metricId);
+                return goal ? (
+                  <ReferenceLine
+                    key={`ref-${cm.id}`}
+                    y={Number(goal)}
+                    stroke={cm.metric.color || "var(--primary)"}
+                    strokeDasharray="5 5"
+                    label={{
+                      position: "top",
+                      value: `Meta ${cm.metric.name}`,
+                      fill: cm.metric.color,
+                      fontSize: 10,
+                    }}
+                  />
+                ) : null;
+              })}
+
+              {activeMetrics.map((cm) => (
+                <Bar
+                  key={cm.id}
+                  dataKey={cm.metric.name}
+                  fill={cm.metric.color || "var(--primary)"}
+                  radius={[4, 4, 0, 0]}
+                  barSize={20}
+                  activeBar={false}
                 />
-              )}
-              <Bar
-                dataKey="energía"
-                fill="#fbbf24"
-                radius={[4, 4, 0, 0]}
-                barSize={20}
-                activeBar={false}
-              />
-              <Bar
-                dataKey="agua"
-                fill="#3b82f6"
-                radius={[4, 4, 0, 0]}
-                barSize={20}
-                activeBar={false}
-              />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>

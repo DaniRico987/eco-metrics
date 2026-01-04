@@ -25,6 +25,7 @@ import { Management } from "./pages/Management/Management";
 import { ImpactEntry } from "./pages/Impact/ImpactEntry";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Profile } from "./pages/Profile/Profile";
+import { Onboarding } from "./pages/Onboarding/Onboarding";
 import { Reports } from "./pages/Reports/Reports";
 import { GET_DASHBOARD_DATA } from "./graphql/impactQueries";
 import { useQuery } from "@apollo/client";
@@ -60,7 +61,17 @@ function App() {
       setUser(dashboardData.me);
       localStorage.setItem("user", JSON.stringify(dashboardData.me));
     }
-  }, [dashboardData]);
+
+    // Check for onboarding status
+    if (
+      dashboardData?.myCompany &&
+      !dashboardData.myCompany.isConfigured &&
+      user?.role === "COMPANY_MANAGER" &&
+      location.pathname !== "/onboarding"
+    ) {
+      navigate("/onboarding");
+    }
+  }, [dashboardData, user, location.pathname, navigate]);
 
   const handleLoginSuccess = (newToken: string, newUser: User) => {
     setToken(newToken);
@@ -315,7 +326,7 @@ function App() {
                     myCompany={myCompany}
                     goals={goals}
                     loadingImpact={loadingImpact}
-                    onAnalyzeMetric={(type, content) => {
+                    onAnalyzeMetric={(type: string, content: string) => {
                       setChatContext({ type, content });
                       setIsChatOpen(true);
                     }}
@@ -323,6 +334,7 @@ function App() {
                 }
               />
               <Route path="/management" element={<Management />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route
                 path="/impact"
                 element={<ImpactEntry onSuccess={() => navigate("/")} />}

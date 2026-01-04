@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   Lightbulb,
   TrendingDown,
-  TrendingUp,
   AlertCircle,
   Users,
   Sparkles,
@@ -35,60 +34,43 @@ export const EcoInsights: React.FC<EcoInsightsProps> = ({
   const latest = sortedRecords[0];
   const previous = sortedRecords[1];
   const employees = company?.employeesCount || 1;
+  const activeMetrics =
+    company?.companyMetrics?.filter((cm) => cm.isActive) || [];
 
-  const insights = [
-    {
-      title: "Eficiencia Energética",
-      value: Number(latest.energyKwh),
-      prevValue: Number(previous.energyKwh),
-      unit: "kWh",
-      icon: <TrendingDown className="w-5 h-5" />,
-      color: "text-amber-400",
-      bg: "bg-amber-400/10",
-      type: "ENERGY",
-    },
-    {
-      title: "Gestión Hídrica",
-      value: Number(latest.waterM3),
-      prevValue: Number(previous.waterM3),
-      unit: "m³",
-      icon: <TrendingDown className="w-5 h-5" />,
-      color: "text-blue-400",
-      bg: "bg-blue-400/10",
-      type: "WATER",
-    },
-    {
-      title: "Residuos y Circularidad",
-      value: Number(latest.wasteKg),
-      prevValue: Number(previous.wasteKg),
-      unit: "kg",
-      icon: <TrendingDown className="w-5 h-5" />,
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/10",
-      type: "WASTE",
-    },
-  ].map((item) => {
-    const diff = ((item.value - item.prevValue) / item.prevValue) * 100;
+  const insights = activeMetrics.map((cm) => {
+    const val =
+      latest.values.find((v) => v.metricId === cm.metricId)?.amount || 0;
+    const prevVal =
+      previous.values.find((v) => v.metricId === cm.metricId)?.amount || 0;
+
+    // Avoid division by zero
+    let diff = 0;
+    if (prevVal !== 0) {
+      diff = ((val - prevVal) / prevVal) * 100;
+    }
+
     const isGood = diff <= 0;
-    const perCapita = item.value / employees;
+    const perCapita = val / employees;
 
     const goal = goals.find(
-      (g) => g.category === item.type && g.year === latest.year
+      (g) => g.metricId === cm.metricId && g.year === latest.year
     );
-    const goalMet = goal ? item.value <= Number(goal.target) : null;
+    const goalMet = goal ? val <= Number(goal.target) : null;
 
     return {
-      ...item,
+      title: cm.metric.name,
+      value: val,
+      prevValue: prevVal,
+      unit: cm.metric.unit,
+      icon: <TrendingDown className="w-5 h-5" />, // Reusing generic, could be mapped or part of Metric
+      color: cm.metric.color || "text-primary",
+      bg: "bg-white/5", // Generic bg or derived from color
+      type: cm.metric.name, // Using name as type identifier
       diff: diff.toFixed(1),
       isGood,
       perCapita: perCapita.toFixed(2),
       goalMet,
       goalValue: goal?.target,
-      icon: isGood ? (
-        <TrendingDown className="w-5 h-5" />
-      ) : (
-        <TrendingUp className="w-5 h-5" />
-      ),
     };
   });
 

@@ -9,15 +9,16 @@ export class GoalsService {
   async findAllByCompany(companyId: string) {
     return this.prisma.goal.findMany({
       where: { companyId },
+      include: { metric: true }, // Include metric details
     });
   }
 
   async upsert(data: CreateGoalInput, companyId: string) {
     return this.prisma.goal.upsert({
       where: {
-        companyId_category_year: {
+        companyId_metricId_year: {
           companyId,
-          category: data.category,
+          metricId: data.metricId,
           year: data.year,
         },
       },
@@ -25,7 +26,9 @@ export class GoalsService {
         target: data.target,
       },
       create: {
-        ...data,
+        metricId: data.metricId,
+        target: data.target,
+        year: data.year,
         companyId,
       },
     });

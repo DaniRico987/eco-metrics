@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ImpactValue } from './impact-value.model';
 
 @ObjectType()
 export class ImpactRecord {
@@ -12,19 +13,10 @@ export class ImpactRecord {
   year: number;
 
   @Field(() => Float)
-  energyKwh: number;
+  totalImpact: number; // Calculated sum from values
 
-  @Field(() => Float)
-  waterM3: number;
-
-  @Field(() => Float)
-  wasteKg: number;
-
-  @Field(() => Float)
-  transportKm: number;
-
-  @Field(() => Float)
-  totalImpact: number;
+  @Field(() => [ImpactValue])
+  values: ImpactValue[];
 
   @Field()
   createdAt: Date;

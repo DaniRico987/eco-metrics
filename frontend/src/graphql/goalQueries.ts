@@ -4,7 +4,7 @@ export const GET_MY_COMPANY_GOALS = gql`
   query GetMyCompanyGoals {
     myCompanyGoals {
       id
-      category
+      metricId
       target
       year
     }
@@ -15,7 +15,7 @@ export const UPSERT_GOAL_MUTATION = gql`
   mutation UpsertGoal($data: CreateGoalInput!) {
     upsertGoal(data: $data) {
       id
-      category
+      metricId
       target
       year
     }

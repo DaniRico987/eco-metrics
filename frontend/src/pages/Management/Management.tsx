@@ -19,6 +19,7 @@ import {
   REJECT_USER_MUTATION,
 } from "../../graphql/userQueries";
 import { GoalSettings } from "./GoalSettings";
+import { MetricSettings } from "./MetricSettings";
 import { User, UsersByCompanyData, UserStatus } from "../../types";
 
 export const Management: React.FC = () => {
@@ -143,6 +144,9 @@ export const Management: React.FC = () => {
         </section>
       )}
 
+      <hr className="border-white/5" />
+      <MetricSettings />
+      <hr className="border-white/5" />
       <GoalSettings />
     </div>
   );

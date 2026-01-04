@@ -78,11 +78,41 @@ export const Management: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold mb-2">Gestión de Equipo</h1>
-        <p className="text-text-secondary">
-          Administra los accesos y roles de los miembros de tu organización.
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
+        <div>
+          <h1 className="text-3xl font-extrabold mb-2">Gestión de Equipo</h1>
+          <p className="text-text-secondary">
+            Administra los accesos y roles de los miembros de tu organización.
+          </p>
+        </div>
+        <div className="flex items-center gap-6 px-6 py-3 rounded-2xl bg-white/[0.03] border border-white/5 backdrop-blur-sm">
+          <div className="text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-1">
+              Total
+            </p>
+            <p className="text-2xl font-black text-primary leading-none">
+              {users.length}
+            </p>
+          </div>
+          <div className="w-px h-8 bg-white/10" />
+          <div className="text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-1">
+              Activos
+            </p>
+            <p className="text-2xl font-black text-green-400 leading-none">
+              {active.length}
+            </p>
+          </div>
+          <div className="w-px h-8 bg-white/10" />
+          <div className="text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-1">
+              Espera
+            </p>
+            <p className="text-2xl font-black text-amber-400 leading-none">
+              {pending.length}
+            </p>
+          </div>
+        </div>
       </div>
 
       {pending.length > 0 && (

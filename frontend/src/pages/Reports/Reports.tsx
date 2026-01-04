@@ -76,7 +76,7 @@ export const Reports: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
     >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-3">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-4">
         <div>
           <div className="flex items-center gap-2 text-primary mb-2">
             <FileText className="w-5 h-5" />
@@ -84,34 +84,44 @@ export const Reports: React.FC = () => {
               Centro de Documentación
             </span>
           </div>
-          <h1 className="text-4xl font-extrabold mb-1">
+          <h1 className="text-4xl font-extrabold mb-1 tracking-tight">
             Reportes y Exportación
           </h1>
-          <p className="text-text-secondary">
-            Genera documentos oficiales sobre el impacto ambiental de tu
-            empresa.
+          <p className="text-text-secondary max-w-2xl leading-relaxed">
+            Genera documentos oficiales sobre el impacto ambiental de tu empresa
+            para auditorías, marketing o cumplimiento legal.
           </p>
         </div>
-        <div className="flex gap-3">
-          <button className="btn glass flex items-center gap-2">
-            <Filter className="w-4 h-4" /> Filtrar
+        <div className="flex gap-3 w-full lg:w-auto">
+          <button className="btn glass flex-1 lg:flex-initial flex items-center justify-center gap-2">
+            <Filter className="w-4 h-4" /> <span>Filtrar</span>
           </button>
-          <button className="btn btn-primary shadow-lg shadow-primary/20 px-6 py-3 flex items-center gap-2">
-            <PlusCircle className="w-5 h-5" /> Nuevo Reporte
+          <button className="btn btn-primary shadow-lg shadow-primary/20 px-6 py-3 flex-1 lg:flex-initial flex items-center justify-center gap-2">
+            <PlusCircle className="w-5 h-5" /> <span>Nuevo Reporte</span>
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="card p-4 sm:p-6">
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+          <div className="card p-4 sm:p-8 bg-white/[0.01] border-white/5 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+              <FileText className="w-32 h-32 rotate-12" />
+            </div>
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative">
               <Clock className="w-5 h-5 text-primary" /> Reportes Disponibles
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-4 relative">
               {records.length === 0 ? (
-                <div className="text-center p-8 text-text-secondary">
-                  No hay registros de impacto disponibles para generar reportes.
+                <div className="text-center py-16 px-4 rounded-3xl bg-white/[0.02] border border-dashed border-white/10">
+                  <FileSpreadsheet className="w-12 h-12 text-text-muted mx-auto mb-4 opacity-20" />
+                  <p className="text-text-secondary font-medium">
+                    No hay registros de impacto disponibles
+                  </p>
+                  <p className="text-xs text-text-muted mt-1">
+                    Empieza a registrar datos en la sección "Cargar Datos" para
+                    ver tus reportes.
+                  </p>
                 </div>
               ) : (
                 records.map((report) => (

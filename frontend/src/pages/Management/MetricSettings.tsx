@@ -90,36 +90,36 @@ export const MetricSettings: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Settings className="w-8 h-8 text-primary" />
-          <h2 className="text-2xl font-bold font-display">
+          <h2 className="text-2xl font-bold font-display tracking-tight">
             Métricas de la Organización
           </h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {requestSuccess && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold rounded-full flex items-center gap-1"
+              className="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-black uppercase rounded-full flex items-center gap-1 shrink-0"
             >
-              <Check className="w-3 h-3" /> Solicitud enviada
+              <Check className="w-3 h-3" /> Enviada
             </motion.div>
           )}
           <button
             onClick={() => setWizardMode(true)}
-            className="btn glass gap-2 border-primary/20 text-primary hover:bg-primary/20"
+            className="flex-1 sm:flex-initial btn glass gap-2 border-primary/20 text-primary hover:bg-primary/20 text-xs sm:text-sm py-2 px-3 sm:px-4"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Nueva Métrica Propia</span>
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span>Nueva Propia</span>
           </button>
           <button
             onClick={() => setRequestMode(!requestMode)}
-            className="btn glass gap-2 border-white/10 text-text-secondary hover:bg-white/5"
+            className="flex-1 sm:flex-initial btn glass gap-2 border-white/10 text-text-secondary hover:bg-white/5 text-xs sm:text-sm py-2 px-3 sm:px-4"
           >
-            <AlertCircle className="w-4 h-4" />
-            <span>Solicitar Compleja</span>
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Solicitar</span>
           </button>
         </div>
       </div>

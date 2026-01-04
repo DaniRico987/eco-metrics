@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { motion } from "framer-motion";
-import { Calendar, Send, Loader2, CheckCircle2, Leaf } from "lucide-react";
+import {
+  Calendar,
+  Send,
+  Loader2,
+  CheckCircle2,
+  Leaf,
+  Zap,
+  Droplet,
+  Trash2,
+  Truck,
+} from "lucide-react";
 import {
   CREATE_IMPACT_RECORD,
   GET_IMPACT_RECORDS,
@@ -25,6 +35,14 @@ const MONTHS = [
   "Diciembre",
   "Mes 13 (Ajuste)",
 ];
+
+const IconMap: Record<string, React.ReactNode> = {
+  Zap: <Zap />,
+  Droplet: <Droplet />,
+  Trash2: <Trash2 />,
+  Truck: <Truck />,
+  Leaf: <Leaf />,
+};
 
 export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
   onSuccess,
@@ -172,9 +190,9 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
               unit={cm.metric.unit}
               value={metricValues[cm.metricId] || 0}
               onChange={(e) => handleMetricChange(cm.metricId, e.target.value)}
-              // Dynamic styling could be improved here based on metric type if we add 'type' to backend
+              // Dynamic styling based on metric color
               color={cm.metric.color || "text-primary"}
-              icon={<Leaf />} // We could map backend icons to Lucide components here
+              icon={IconMap[cm.metric.icon || "Leaf"] || <Leaf />}
             />
           ))}
           {activeMetrics.length === 0 && (

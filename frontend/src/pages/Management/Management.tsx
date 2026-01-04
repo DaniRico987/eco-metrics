@@ -195,7 +195,9 @@ const UserRow: React.FC<UserRowProps> = ({
             </span>
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />{" "}
-              {new Date(Number(user.createdAt)).toLocaleDateString()}
+              {user.createdAt
+                ? new Date(user.createdAt).toLocaleDateString()
+                : "N/A"}
             </span>
           </div>
         </div>

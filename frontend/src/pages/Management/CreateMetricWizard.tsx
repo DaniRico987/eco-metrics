@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,12 +10,15 @@ import {
   X,
   Info,
 } from "lucide-react";
+import { IconPicker } from "../../components/IconPicker";
 import { SUGGEST_METRIC_DETAILS } from "../../graphql/aiQueries";
 import {
   CREATE_METRIC,
   GET_METRICS,
   GET_MY_COMPANY,
 } from "../../graphql/companyQueries";
+import { useSnackbar } from "../../context/SnackbarContext";
+import { getReadableErrorMessage } from "../../utils/errorHandler";
 
 interface CreateMetricWizardProps {
   onClose: () => void;
@@ -26,24 +29,37 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
   onClose,
   onCreated,
 }) => {
+  const { show, error: showError } = useSnackbar();
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
   const [description, setDescription] = useState("");
   const [factor, setFactor] = useState(0);
+  const [icon, setIcon] = useState("Leaf");
+  const [color, setColor] = useState("#4ADE80");
 
   const [getSuggestions, { data: aiData, loading: aiLoading }] = useLazyQuery(
     SUGGEST_METRIC_DETAILS
   );
-  const [createMetric, { loading: creating }] = useMutation(CREATE_METRIC, {
-    refetchQueries: [{ query: GET_METRICS }, { query: GET_MY_COMPANY }],
-    onCompleted: (data) => {
-      if (onCreated && data?.createMetric?.id) {
-        onCreated(data.createMetric.id);
-      }
-      onClose();
-    },
-  });
+  const [createMetric, { loading: creating, error: createError }] = useMutation(
+    CREATE_METRIC,
+    {
+      refetchQueries: [{ query: GET_METRICS }, { query: GET_MY_COMPANY }],
+      onCompleted: (data) => {
+        if (onCreated && data?.createMetric?.id) {
+          onCreated(data.createMetric.id);
+        }
+        show("Métrica cancelada correctamente", "success");
+        onClose();
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (createError) {
+      showError(getReadableErrorMessage(createError));
+    }
+  }, [createError, showError]);
 
   const handleNext = async () => {
     if (step === 1 && name) {
@@ -66,8 +82,8 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
           name,
           unit,
           description,
-          icon: "Leaf",
-          color: "#4ADE80",
+          icon,
+          color,
           emissionFactor: Number(factor),
         },
       },
@@ -221,6 +237,35 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-text-muted uppercase">
+                  Ícono
+                </label>
+                <IconPicker selectedIcon={icon} onSelect={setIcon} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-text-muted uppercase">
+                  Color
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    className="w-16 h-10 rounded-lg cursor-pointer border-2 border-white/10"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    className="input flex-1"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    placeholder="#4ADE80"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-3">

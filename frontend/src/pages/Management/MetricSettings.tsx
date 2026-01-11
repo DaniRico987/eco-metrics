@@ -7,13 +7,9 @@ import {
   Check,
   AlertCircle,
   Loader2,
-  Zap,
-  Droplet,
-  Trash2,
-  Truck,
-  Leaf,
   Sparkles,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import {
   GET_METRICS,
   GET_MY_COMPANY,
@@ -22,16 +18,11 @@ import {
 } from "../../graphql/companyQueries";
 import { Metric, CompanyMetric } from "../../types";
 import { CreateMetricWizard } from "./CreateMetricWizard";
-
-const IconMap: Record<string, React.ReactNode> = {
-  Zap: <Zap />,
-  Droplet: <Droplet />,
-  Trash2: <Trash2 />,
-  Truck: <Truck />,
-  Leaf: <Leaf />,
-};
+import { useSnackbar } from "../../context/SnackbarContext";
+import { getReadableErrorMessage } from "../../utils/errorHandler";
 
 export const MetricSettings: React.FC = () => {
+  const { show, error: showError } = useSnackbar();
   const { data: catalogData, loading: loadingCatalog } = useQuery(GET_METRICS);
   const {
     data: companyData,
@@ -46,8 +37,7 @@ export const MetricSettings: React.FC = () => {
   const [requestMetric, { loading: requesting }] = useMutation(REQUEST_METRIC, {
     onCompleted: () => {
       setRequestDescription("");
-      setRequestSuccess(true);
-      setTimeout(() => setRequestSuccess(false), 3000);
+      show("Solicitud enviada correctamente", "success");
       setRequestMode(false);
     },
   });
@@ -55,7 +45,6 @@ export const MetricSettings: React.FC = () => {
   const [requestMode, setRequestMode] = useState(false);
   const [wizardMode, setWizardMode] = useState(false);
   const [requestDescription, setRequestDescription] = useState("");
-  const [requestSuccess, setRequestSuccess] = useState(false);
 
   if (loadingCatalog || loadingCompany) {
     return (
@@ -75,7 +64,7 @@ export const MetricSettings: React.FC = () => {
     try {
       await toggleMetric({ variables: { metricId } });
     } catch (err) {
-      console.error(err);
+      showError(getReadableErrorMessage(err as Error));
     }
   };
 
@@ -84,7 +73,7 @@ export const MetricSettings: React.FC = () => {
     try {
       await requestMetric({ variables: { description: requestDescription } });
     } catch (err) {
-      console.error(err);
+      showError(getReadableErrorMessage(err as Error));
     }
   };
 
@@ -98,15 +87,6 @@ export const MetricSettings: React.FC = () => {
           </h2>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          {requestSuccess && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-black uppercase rounded-full flex items-center gap-1 shrink-0"
-            >
-              <Check className="w-3 h-3" /> Enviada
-            </motion.div>
-          )}
           <button
             onClick={() => setWizardMode(true)}
             className="flex-1 sm:flex-initial btn glass gap-2 border-primary/20 text-primary hover:bg-primary/20 text-xs sm:text-sm py-2 px-3 sm:px-4"
@@ -194,7 +174,12 @@ export const MetricSettings: React.FC = () => {
                       : "bg-white/5 text-text-muted"
                   }`}
                 >
-                  {IconMap[metric.icon || "Leaf"] || <Leaf />}
+                  {(() => {
+                    const Icon =
+                      (LucideIcons as any)[metric.icon || "Leaf"] ||
+                      LucideIcons.Leaf;
+                    return <Icon />;
+                  })()}
                 </div>
                 <div
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${

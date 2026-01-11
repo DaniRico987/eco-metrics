@@ -13,6 +13,7 @@ import {
   FileText,
   Settings,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { EcoInsights } from "../../components/EcoInsights";
 import { ImpactPulse } from "../../components/ImpactPulse";
 import { ImpactCharts } from "../../components/ImpactCharts";
@@ -139,21 +140,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
               })()}
             />
 
-            {activeMetrics.map((cm) => (
-              <StatCard
-                key={cm.id}
-                title={cm.metric.name}
-                value={`${getMetricValue(latestRecord, cm.metricId)} ${
-                  cm.metric.unit
-                }`}
-                color={cm.metric.color || "var(--primary)"}
-                // Lucide icons are React components, harder to map dynamically from string.
-                // Fallback to Zap or generic icon if string not mapped.
-                // For now using generic Activity or similar
-                icon={Activity}
-                trend={calculateTrend(cm.metricId)}
-              />
-            ))}
+            {activeMetrics.map((cm) => {
+              const Icon =
+                (LucideIcons as any)[cm.metric.icon || "Activity"] ||
+                LucideIcons.Activity;
+              return (
+                <StatCard
+                  key={cm.id}
+                  title={cm.metric.name}
+                  value={`${getMetricValue(latestRecord, cm.metricId)} ${
+                    cm.metric.unit
+                  }`}
+                  color={cm.metric.color || "var(--primary)"}
+                  icon={Icon}
+                  trend={calculateTrend(cm.metricId)}
+                />
+              );
+            })}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

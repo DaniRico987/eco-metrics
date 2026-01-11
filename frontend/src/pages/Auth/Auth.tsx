@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,12 +18,14 @@ import {
 } from "../../graphql/authQueries";
 import { getReadableErrorMessage } from "../../utils/errorHandler";
 import { AuthPayload, Company, User } from "../../types";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 interface AuthProps {
   onLoginSuccess: (token: string, user: User) => void;
 }
 
 export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
+  const { show, error: showError } = useSnackbar();
   const [mode, setMode] = useState<"login" | "register" | "company">("login");
   const [formData, setFormData] = useState({
     email: "",
@@ -37,14 +39,15 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
 
   const { data: companiesData } = useQuery(GET_COMPANIES);
 
-  const handleAuthComplete = (data: {
+  const handleAuthComplete = async (data: {
     login?: AuthPayload;
     register?: AuthPayload;
     registerCompany?: AuthPayload;
   }) => {
     const result = data.login || data.register || data.registerCompany;
     if (result) {
-      onLoginSuccess(result.accessToken, result.user);
+      show(`Bienvenido, ${result.user.name}`, "success");
+      await onLoginSuccess(result.accessToken, result.user);
     }
   };
 
@@ -63,6 +66,12 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
 
   const error = loginErr || regErr || compErr;
   const loading = loginLoading || regLoading || compLoading;
+
+  useEffect(() => {
+    if (error) {
+      showError(getReadableErrorMessage(error));
+    }
+  }, [error, showError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +125,7 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass p-8 rounded-3xl w-full max-w-md shadow-2xl relative my-8"
+        className="glass p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl relative my-8"
       >
         <div className="relative z-10">
           <h2 className="text-3xl font-bold mb-2 text-center">
@@ -251,16 +260,6 @@ export const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                 onChange={handleChange}
               />
             </div>
-
-            {error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-red-400 text-sm bg-red-400/10 p-3 rounded-lg border border-red-400/20"
-              >
-                {getReadableErrorMessage(error)}
-              </motion.p>
-            )}
 
             <button
               disabled={loading}

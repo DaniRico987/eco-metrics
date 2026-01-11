@@ -30,7 +30,8 @@ import { Reports } from "./pages/Reports/Reports";
 import { GET_DASHBOARD_DATA } from "./graphql/impactQueries";
 import { useQuery } from "@apollo/client";
 import { AiChat } from "./components/AiChat";
-import { User, ImpactRecord, DashboardData } from "./types";
+import { User, ImpactRecord, DashboardData, Role } from "./types";
+import { client } from "./main";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -44,7 +45,8 @@ function App() {
 
   const { data: dashboardData, loading: loadingImpact } =
     useQuery<DashboardData>(GET_DASHBOARD_DATA, {
-      skip: !token || user?.status === "PENDING",
+      skip: !token,
+      fetchPolicy: "network-only", // Always fetch fresh data, never use cache
     });
 
   useEffect(() => {
@@ -57,42 +59,51 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (dashboardData?.me) {
-      setUser(dashboardData.me);
-      localStorage.setItem("user", JSON.stringify(dashboardData.me));
-    }
-
     // Check for onboarding status
     if (
       dashboardData?.myCompany &&
       !dashboardData.myCompany.isConfigured &&
-      user?.role === "COMPANY_MANAGER" &&
+      dashboardData.me?.role === Role.COMPANY_MANAGER &&
       location.pathname !== "/onboarding"
     ) {
       navigate("/onboarding");
     }
-  }, [dashboardData, user, location.pathname, navigate]);
+  }, [dashboardData, location.pathname, navigate]);
 
-  const handleLoginSuccess = (newToken: string, newUser: User) => {
+  const handleLoginSuccess = async (newToken: string, newUser: User) => {
+    // Clear any existing cache/state before setting new credentials
+    try {
+      await client.clearStore();
+    } catch (error) {
+      console.error("Error clearing cache on login:", error);
+    }
+
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setToken(null);
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    navigate("/");
+    try {
+      await client.clearStore();
+    } catch (error) {
+      console.error("Error clearing Apollo cache:", error);
+    }
+    navigate("/", { replace: true });
   };
 
   if (!token) {
     return <Auth onLoginSuccess={handleLoginSuccess} />;
   }
+  const isPrivileged =
+    user?.role === Role.SUPER_ADMIN || user?.role === Role.COMPANY_MANAGER;
 
-  if (user?.status === "PENDING") {
+  if (user?.status === "PENDING" && !isPrivileged) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-bg-dark">
         <motion.div
@@ -314,7 +325,7 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
         <div className="p-3 sm:p-6 lg:p-8 overflow-y-auto h-full custom-scrollbar">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>

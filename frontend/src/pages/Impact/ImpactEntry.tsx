@@ -1,17 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
-import { motion } from "framer-motion";
-import {
-  Calendar,
-  Send,
-  Loader2,
-  CheckCircle2,
-  Leaf,
-  Zap,
-  Droplet,
-  Trash2,
-  Truck,
-} from "lucide-react";
+import { Calendar, Send, Loader2 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import {
   CREATE_IMPACT_RECORD,
   GET_IMPACT_RECORDS,
@@ -19,6 +9,7 @@ import {
 import { GET_MY_COMPANY } from "../../graphql/companyQueries";
 import { getReadableErrorMessage } from "../../utils/errorHandler";
 import { CompanyMetric } from "../../types";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const MONTHS = [
   "Enero",
@@ -36,17 +27,10 @@ const MONTHS = [
   "Mes 13 (Ajuste)",
 ];
 
-const IconMap: Record<string, React.ReactNode> = {
-  Zap: <Zap />,
-  Droplet: <Droplet />,
-  Trash2: <Trash2 />,
-  Truck: <Truck />,
-  Leaf: <Leaf />,
-};
-
 export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
   onSuccess,
 }) => {
+  const { show, error: showError } = useSnackbar();
   const { data: companyData, loading: loadingConfig } =
     useQuery(GET_MY_COMPANY);
 
@@ -56,18 +40,20 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
   });
 
   const [metricValues, setMetricValues] = useState<Record<string, number>>({});
-  const [submitted, setSubmitted] = useState(false);
 
   const [createRecord, { loading, error }] = useMutation(CREATE_IMPACT_RECORD, {
     refetchQueries: [{ query: GET_IMPACT_RECORDS }],
     onCompleted: () => {
-      setSubmitted(true);
-      setTimeout(() => {
-        setSubmitted(false);
-        onSuccess();
-      }, 2000);
+      show("¡Registro Guardado! Los datos han sido procesados.", "success");
+      onSuccess();
     },
   });
+
+  useEffect(() => {
+    if (error) {
+      showError(getReadableErrorMessage(error));
+    }
+  }, [error, showError]);
 
   const activeMetrics =
     companyData?.myCompany?.companyMetrics?.filter(
@@ -112,24 +98,6 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
       <div className="flex justify-center p-12">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
-    );
-  }
-
-  if (submitted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="card p-12 text-center"
-      >
-        <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto mb-6 text-primary">
-          <CheckCircle2 className="w-12 h-12" />
-        </div>
-        <h2 className="text-3xl font-bold mb-2">¡Registro Guardado!</h2>
-        <p className="text-text-secondary">
-          Los datos han sido procesados y el dashboard se está actualizando.
-        </p>
-      </motion.div>
     );
   }
 
@@ -183,18 +151,25 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {activeMetrics.map((cm: CompanyMetric) => (
-            <MetricInput
-              key={cm.id}
-              label={cm.metric.name}
-              unit={cm.metric.unit}
-              value={metricValues[cm.metricId] || 0}
-              onChange={(e) => handleMetricChange(cm.metricId, e.target.value)}
-              // Dynamic styling based on metric color
-              color={cm.metric.color || "text-primary"}
-              icon={IconMap[cm.metric.icon || "Leaf"] || <Leaf />}
-            />
-          ))}
+          {activeMetrics.map((cm: CompanyMetric) => {
+            const Icon =
+              (LucideIcons as any)[cm.metric.icon || "Leaf"] ||
+              LucideIcons.Leaf;
+            return (
+              <MetricInput
+                key={cm.id}
+                label={cm.metric.name}
+                unit={cm.metric.unit}
+                value={metricValues[cm.metricId] || 0}
+                onChange={(e) =>
+                  handleMetricChange(cm.metricId, e.target.value)
+                }
+                // Dynamic styling based on metric color
+                color={cm.metric.color || "text-primary"}
+                icon={<Icon />}
+              />
+            );
+          })}
           {activeMetrics.length === 0 && (
             <div className="col-span-2 text-center p-8 border border-dashed border-white/10 rounded-2xl text-text-secondary">
               No tienes métricas configuradas. Ve a configuración para activar
@@ -202,12 +177,6 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
             </div>
           )}
         </div>
-
-        {error && (
-          <div className="p-4 bg-red-400/10 border border-red-400/20 rounded-2xl text-red-400 text-sm">
-            {getReadableErrorMessage(error)}
-          </div>
-        )}
 
         <button
           disabled={loading || activeMetrics.length === 0}

@@ -11,7 +11,7 @@ import App from "./App.tsx";
 import "./index.css";
 
 const httpLink = createHttpLink({
-  uri: "http://localhost:3000/graphql",
+  uri: import.meta.env.VITE_API_URL || "http://localhost:3000/graphql",
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -43,5 +43,5 @@ createRoot(document.getElementById("root")!).render(
         </SnackbarProvider>
       </BrowserRouter>
     </ApolloProvider>
-  </StrictMode>
+  </StrictMode>,
 );

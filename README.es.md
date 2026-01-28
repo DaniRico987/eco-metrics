@@ -2,98 +2,125 @@
 
 > 🇬🇧 [Read this in English](./README.md)
 
-**Eco Metrics** es una plataforma de sostenibilidad de nivel profesional para medir, rastrear y gestionar el impacto ambiental corporativo. Permite a las organizaciones monitorear métricas clave de consumo, establecer metas anuales y obtener insights potenciados por IA para reducir su huella de carbono.
+![Render Status](https://img.shields.io/badge/Despliegue-En_Línea-success?style=for-the-badge&logo=render)
+![Vercel Status](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)
+![Tech Stack](https://img.shields.io/badge/Stack-PERN-blue?style=for-the-badge)
+![License](https://img.shields.io/badge/Licencia-MIT-yellow?style=for-the-badge)
 
-## 🚀 Características Principales
-
-### 🏢 Organización y Acceso
-
-- **Onboarding de Empresas**: Flujo de registro optimizado para nuevas compañías.
-- **Control Basado en Roles**: Acceso jerárquico para `SUPER_ADMIN`, `COMPANY_MANAGER` y `USER`.
-- **Sistema de Aprobación**: Los administradores aprueban/rechazan solicitudes para proteger los datos de la empresa.
-
-### 📊 Inteligencia de Impacto
-
-- **Registro Mensual**: Logs detallados de Energía (kWh), Agua (m³), Residuos (kg) y Transporte (km).
-- **Dashboard Profesional**: Visualizaciones avanzadas y análisis de tendencias en tiempo real con Recharts.
-- **Gestión de Metas**: Establece y mide objetivos de sostenibilidad anuales por categoría.
-- **Eco-Asistente IA**: Insights contextuales (Groq + LLAMA 3.3) para la optimización basada en datos.
-
-### ✨ Métricas Personalizadas con IA [NUEVO]
-
-- **Asistente IA**: Crea métricas específicas para tu negocio (ej: "Harina", "Viajes en Uber") con guía de IA.
-- **Cálculo Automático**: La IA sugiere unidades y factores de emisión científicos (GHG Protocol).
-- **Seguridad e Integridad**: Las métricas están vinculadas a la empresa y protegidas contra ediciones no autorizadas para garantizar la auditabilidad.
-
-### 🛡️ Excelencia Técnica
-
-- **Caché de IA Persistente**: Almacenamiento en base de datos de respuestas de IA para eliminar costos redundantes.
-- **Arquitectura de Doble Modelo**: Alta inteligencia (`LLAMA 3.3 70B`) para consejos, alta velocidad (`LLAMA 3.1 8B`) para extracción de datos.
-- **Tipado 100% Seguro**: Cobertura estricta de TypeScript Full-Stack (Cero uso de `any`).
-- **Diseño Responsive**: Interfaz premium en modo oscuro optimizada para móvil y escritorio.
-
-## 🛠️ Stack Tecnológico
-
-| Capa              | Tecnologías                                           |
-| :---------------- | :---------------------------------------------------- |
-| **Backend**       | NestJS, Node.js, GraphQL (Apollo), Prisma 7+          |
-| **Frontend**      | React, Vite, Apollo Client, CSS inspirado en Tailwind |
-| **Base de Datos** | PostgreSQL (con Caché de IA persistente)              |
-| **Modelos IA**    | Groq SDK (LLAMA 3.3-70b-v / LLAMA 3.1-8b-instant)     |
-| **Animaciones**   | Framer Motion, Lucide React (Iconos)                  |
-
-## 📂 Estructura del Proyecto
-
-```bash
-eco-metrics/
-├── backend/             # API GraphQL NestJS
-│   ├── src/             # Código fuente (Servicios, Resolvers, Guards)
-│   ├── prisma/          # Esquema de DB y Caché Persistente de IA
-│   └── common/          # Decoradores, interfaces y filtros globales
-└── frontend/            # Cliente React + Vite
-    ├── src/components/  # Widgets de UI y Gráficos
-    ├── src/pages/       # Vistas de la App y Navegación
-    ├── src/graphql/     # API Queries y Mutaciones (Cliente Unificado)
-    └── src/types/       # Sistema de Tipos Centralizado (Fuente de Verdad)
-```
-
-## ⚙️ Instalación y Configuración
-
-### Prerrequisitos
-
-- **Node.js**: v20+
-- **Base de Datos**: PostgreSQL
-- **IA Key**: Groq API Key
-
-### 1. Configuración del Backend
-
-1. `cd backend`
-2. `npm install`
-3. Crear `.env`:
-   ```env
-   DATABASE_URL="postgresql://user:pass@localhost:5432/eco_metrics?schema=public"
-   JWT_SECRET="tu_clave_secreta_aleatoria"
-   GROQ_API_KEY="tu_llave_de_groq"
-   ```
-4. `npx prisma db push`
-5. `npm run start:dev`
-
-### 2. Configuración del Frontend
-
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
-
-## 📜 Puntos Destacados de la Arquitectura
-
-### El Sistema de Tipos 🛡️
-
-El proyecto utiliza un **Protocolo de Tipado Centralizado**. Cualquier cambio en el modelo de datos debe actualizarse en `frontend/src/types/index.ts`, asegurando que toda la interfaz permanezca sincronizada y segura.
-
-### Rendimiento y Escalabilidad ⚡
-
-Con la implementación de **AiCache** y el uso especializado de **Llama-3.1-8B** para tareas sencillas, la aplicación se mantiene altamente responsiva y eficiente en costos incluso bajo alta carga de usuarios.
+**Eco Metrics** es una plataforma de sostenibilidad de nivel profesional diseñada para que las empresas midan, rastreen y gestionen su impacto ambiental. Aprovechando **Inteligencia Artificial (Llama 3.3)** y **Analítica en Tiempo Real**, empodera a las organizaciones para tomar decisiones basadas en datos y reducir su huella de carbono.
 
 ---
 
-_Desarrollado con enfoque en Rendimiento, Sostenibilidad y Calidad de Código._
+## 🚀 Demo en Vivo
+
+| Servicio              | Estado     | URL                                                                          |
+| :-------------------- | :--------- | :--------------------------------------------------------------------------- |
+| **🚀 App (Frontend)** | **Online** | [**eco-metrics.onrender.com**](https://eco-metrics.onrender.com/)            |
+| **⚙️ API (Backend)**  | **Online** | [eco-metrics.onrender.com/graphql](https://eco-metrics.onrender.com/graphql) |
+
+> **Credenciales de Prueba:**
+>
+> - **Manager:** `admin@ecotest.com` / `Test1234`
+> - **Empleado:** `empleado@ecotest.com` / `Test1234`
+
+---
+
+## 📚 Documentación y Manuales
+
+Guías completas para Pruebas de Aceptación (UAT) y flujos por rol.
+
+| Rol                    | Descripción                                  | Enlace                                            |
+| :--------------------- | :------------------------------------------- | :------------------------------------------------ |
+| **👮 Company Manager** | Gestión administrativa, aprobaciones, metas. | [Ver Manual](./testing_manual_company_manager.md) |
+| **🧑‍💻 Empleado**        | Carga de datos, visualización de métricas.   | [Ver Manual](./testing_manual_empleado.md)        |
+
+---
+
+## ✨ Características Principales
+
+### 🧠 Métricas Personalizadas con IA
+
+Crea métricas específicas (ej: _"Viajes Uber"_, _"Uso de Harina"_) guiado por nuestro **AI Wizard**.
+
+- **Extracción Inteligente**: La IA determina unidades científicas (`kgCO2e`) y factores de emisión.
+- **Groq + Llama 3.3**: Inferencia ultra-rápida con caché persistente para minimizar costos.
+
+### 🏢 Organización Jerárquica
+
+- **Control de Acceso Estricto**: `SUPER_ADMIN` > `COMPANY_MANAGER` > `USER`.
+- **Sistema de Aprobación**: Onboarding seguro que requiere verificación del manager.
+
+### 📊 Analítica Profesional
+
+- **Dashboard en Tiempo Real**: Gráficos interactivos construidos con **Recharts**.
+- **Seguimiento de Metas**: Define objetivos anuales y monitorea el progreso.
+- **Categorías de Métricas**: Energía (kWh), Agua (m³), Residuos (kg), Transporte (km).
+
+---
+
+---
+
+## 🛠️ Stack Tecnológico
+
+Diseñado para **Alto Rendimiento**, **Escalabilidad** y **Seguridad de Tipos**.
+
+### **Backend (El Núcleo)**
+
+- **Framework**: [NestJS](https://nestjs.com/) (Node.js)
+- **API**: GraphQL (Apollo Server)
+- **Base de Datos**: PostgreSQL 16
+- **ORM**: Prisma 7.2
+- **Motor IA**: Groq SDK + Llama 3.3
+
+### **Frontend (La Experiencia)**
+
+- **Framework**: React 19 + Vite
+- **Estado/Datos**: Apollo Client (Caché Normalizado)
+- **Estilos**: Principios TailwindCSS + Framer Motion
+- **Iconos**: Lucide React
+
+---
+
+## ⚡ Configuración Local
+
+Prerrequisitos: `Node.js v20+`, `PostgreSQL`, `Groq API Key`.
+
+### 1. Servicio Backend
+
+```bash
+cd backend
+npm install
+# Crear archivo .env basado en el ejemplo
+npx prisma db push
+npm run start:dev
+```
+
+### 2. Cliente Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🏛️ Puntos Destacados de Arquitectura
+
+### 🛡️ Protocolo de Tipado Centralizado
+
+Mantenemos una **Fuente Única de Verdad** para los tipos. Los DTOs del Backend y las Interfaces del Frontend están sincronizados para garantizar 100% de seguridad de tipos y prevenir errores en tiempo de ejecución.
+
+### ⚡ Capa AiCache
+
+Para optimizar costos y latencia, cada respuesta de la IA se "hashea" y almacena en PostgreSQL. Esto significa que las consultas repetitivas (como factores de emisión para ítems comunes) son instantáneas y gratuitas después de la primera llamada.
+
+---
+
+## 📝 Licencia
+
+Este proyecto está bajo la **Licencia MIT** - ver el archivo [LICENSE](LICENSE) para detalles.
+
+<div align="center">
+  <p>Creado con ❤️ por el Equipo Eco Metrics</p>
+</div>

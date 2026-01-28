@@ -2,98 +2,125 @@
 
 > 🇪🇸 [Leer esto en Español](./README.es.md)
 
-**Eco Metrics** is a pro-grade sustainability platform for measuring, tracking, and managing corporate environmental impact. It enables organizations to monitor key consumption metrics, set annual targets, and get AI-powered insights to reduce their footprint.
+![Render Status](https://img.shields.io/badge/Deployment-Live-success?style=for-the-badge&logo=render)
+![Vercel Status](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)
+![Tech Stack](https://img.shields.io/badge/Stack-PERN-blue?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-## 🚀 Core Features
-
-### 🏢 Organization & Access
-
-- **Company Onboarding**: Streamlined registration for new companies.
-- **Role-Based Control**: Hierarchical access for `SUPER_ADMIN`, `COMPANY_MANAGER`, and `USER`.
-- **Approval System**: Managers approve/reject member requests to protect company data.
-
-### 📊 Impact Intelligence
-
-- **Monthly Recording**: Detailed logs for Energy (kWh), Water (m³), Waste (kg), and Transport (km).
-- **Pro Dashboard**: High-end visualizations and real-time trend analysis using Recharts.
-- **Goal Management**: Set and track annual sustainability targets per category.
-- **AI Eco-Assistant**: Contextual AI insights (Groq + LLAMA 3.3) for data-driven optimization.
-
-### ✨ Custom AI-Powered Metrics [NEW]
-
-- **AI Wizard**: Create business-specific metrics (e.g., "Flour", "Uber Trips") with AI guidance.
-- **Automatic Calculation**: AI suggests units and scientific emission factors (GHG Protocol).
-- **Security & Integrity**: Metrics are company-bound and protected from unathorized edits to ensure auditability.
-
-### 🛡️ Technical Excellence
-
-- **Persistent AI Cache**: Database-level caching for AI responses to ensure zero redundant costs.
-- **Dual-Model Architecture**: High intelligence (`LLAMA 3.3 70B`) for advice, high speed (`LLAMA 3.1 8B`) for extraction.
-- **100% Type Safety**: Strict Full-Stack TypeScript coverage (Zero `any` usage).
-- **Responsive Design**: Premium dark-mode UI optimized for mobile and desktop.
-
-## 🛠️ Technology Stack
-
-| Layer          | Technologies                                      |
-| :------------- | :------------------------------------------------ |
-| **Backend**    | NestJS, Node.js, GraphQL (Apollo), Prisma 7+      |
-| **Frontend**   | React, Vite, Apollo Client, Tailwind-inspired CSS |
-| **Database**   | PostgreSQL (with persistent AI Caching)           |
-| **AI Models**  | Groq SDK (LLAMA 3.3-70b-v / LLAMA 3.1-8b-instant) |
-| **Animations** | Framer Motion, Lucide React (Icons)               |
-
-## 📂 Project Structure
-
-```bash
-eco-metrics/
-├── backend/             # NestJS GraphQL API
-│   ├── src/             # Source code (Services, Resolvers, Guards)
-│   ├── prisma/          # Database schema & persistent AI cache
-│   └── common/          # Global decorators, interfaces & filters
-└── frontend/            # React + Vite Client
-    ├── src/components/  # UI Widgets & Charts
-    ├── src/pages/       # App Views & Navigation
-    ├── src/graphql/     # API Queries & Mutations (Unified Client)
-    └── src/types/       # Centralized Type System (Source of Truth)
-```
-
-## ⚙️ Installation & Setup
-
-### Prerequisites
-
-- **Node.js**: v20+
-- **Database**: PostgreSQL
-- **AI Key**: Groq API Key
-
-### 1. Backend Setup
-
-1. `cd backend`
-2. `npm install`
-3. Create `.env`:
-   ```env
-   DATABASE_URL="postgresql://user:pass@localhost:5432/eco_metrics?schema=public"
-   JWT_SECRET="your_secure_random_key"
-   GROQ_API_KEY="your_groq_key"
-   ```
-4. `npx prisma db push`
-5. `npm run start:dev`
-
-### 2. Frontend Setup
-
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
-
-## 📜 Architecture Highlights
-
-### The Type System 🛡️
-
-The project uses a **Centralized Type Protocol**. Any change in the data model must be updated in `frontend/src/types/index.ts`, ensuring the entire UI stays synchronized and type-safe.
-
-### Performance & Scaling ⚡
-
-With the **AiCache** implementation and the specialized use of **Llama-3.1-8B** for simple tasks, the application stays highly responsive and cost-effective even under high user load.
+**Eco Metrics** is a pro-grade sustainability platform tailored for enterprises to measure, track, and manage environmental impact. By leveraging **Artificial Intelligence (Llama 3.3)** and **Real-time Analytics**, it empowers organizations to make data-driven decisions to reduce their carbon footprint.
 
 ---
 
-_Developed with focus on Performance, Sustainability and Code Quality._
+## 🚀 Live Demo
+
+| Service               | Status     | URL                                                                          |
+| :-------------------- | :--------- | :--------------------------------------------------------------------------- |
+| **🚀 App (Frontend)** | **Online** | [**eco-metrics.onrender.com**](https://eco-metrics.onrender.com/)            |
+| **⚙️ API (Backend)**  | **Online** | [eco-metrics.onrender.com/graphql](https://eco-metrics.onrender.com/graphql) |
+
+> **Credentials for Testing:**
+>
+> - **Manager:** `admin@ecotest.com` / `Test1234`
+> - **Employee:** `empleado@ecotest.com` / `Test1234`
+
+---
+
+## 📚 Documentation & Manuals
+
+Comprehensive guides for User Acceptance Testing (UAT) and role-specific workflows.
+
+| Role                   | Description                                             | Link                                               |
+| :--------------------- | :------------------------------------------------------ | :------------------------------------------------- |
+| **👮 Company Manager** | Administrative workflows, user approvals, goal setting. | [View Manual](./testing_manual_company_manager.md) |
+| **🧑‍💻 Employee**        | Data entry, metric visualization, reporting.            | [View Manual](./testing_manual_empleado.md)        |
+
+---
+
+## ✨ Core Features
+
+### 🧠 Custom AI-Powered Metrics
+
+Create business-specific metrics (e.g., _"Uber Trips"_, _"Flour Usage"_) driven by our **AI Wizard**.
+
+- **Intelligent Extraction**: AI determines scientific units (`kgCO2e`) and emission factors.
+- **Groq + Llama 3.3**: Ultra-fast inference with persistent caching to minimize costs.
+
+### 🏢 Hierarchical Organization
+
+- **Strict Access Control**: `SUPER_ADMIN` > `COMPANY_MANAGER` > `USER`.
+- **Approval System**: Secure onboarding requiring manager verification.
+
+### 📊 Professional Analytics
+
+- **Real-time Dashboard**: Interactive charts built with **Recharts**.
+- **Goal Tracking**: Set annual sustainability targets and monitor progress in real-time.
+- **Metric Categories**: Energy (kWh), Water (m³), Waste (kg), Transportation (km).
+
+---
+
+---
+
+## 🛠️ Technology Stack
+
+Designed for **High Performance**, **Scalability**, and **Type Safety**.
+
+### **Backend (The Core)**
+
+- **Framework**: [NestJS](https://nestjs.com/) (Node.js)
+- **API**: GraphQL (Apollo Server)
+- **Database**: PostgreSQL 16
+- **ORM**: Prisma 7.2
+- **AI Engine**: Groq SDK + Llama 3.3
+
+### **Frontend (The Experience)**
+
+- **Framework**: React 19 + Vite
+- **State/Data**: Apollo Client (Normalized Cache)
+- **Styling**: TailwindCSS Principles + Framer Motion
+- **Icons**: Lucide React
+
+---
+
+## ⚡ Local Development Setup
+
+Prerequisites: `Node.js v20+`, `PostgreSQL`, `Groq API Key`.
+
+### 1. Backend Service
+
+```bash
+cd backend
+npm install
+# Create .env file based on example
+npx prisma db push
+npm run start:dev
+```
+
+### 2. Frontend Client
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🏛️ Architecture Highlights
+
+### 🛡️ Centralized Type Protocol
+
+We maintain a strict **Single Source of Truth** for types. Backend DTOs and Frontend Interfaces are synchronized to ensure 100% type safety and prevent runtime errors.
+
+### ⚡ AiCache Layer
+
+To optimize costs and latency, every AI response is hashed and cached in PostgreSQL. This means repetitive queries (like emission factors for common items) are instant and free after the first call.
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+<div align="center">
+  <p>Made with ❤️ by the Eco Metrics Team</p>
+</div>

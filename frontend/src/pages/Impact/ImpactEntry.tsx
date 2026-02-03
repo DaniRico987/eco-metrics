@@ -63,13 +63,11 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
     ) || [];
 
   const handleMetricChange = (metricId: string, value: string) => {
-    console.log("🔍 [DEBUG] Changing metric:", metricId, "to value:", value);
     setMetricValues((prev) => {
       const updated = {
         ...prev,
         [metricId]: value === "" ? "" : Number(value),
       };
-      console.log("🔍 [DEBUG] Updated metricValues:", updated);
       return updated;
     });
   };

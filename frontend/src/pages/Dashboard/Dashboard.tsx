@@ -57,9 +57,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const getMetricValue = (
     record: ImpactRecord | undefined,
-    metricId: string
+    metricId: string,
   ) => {
-    return record?.values.find((v) => v.metricId === metricId)?.amount || 0;
+    console.log("🔍 [DASHBOARD] getMetricValue called:", {
+      metricId,
+      recordId: record?.id,
+      valuesCount: record?.values.length,
+    });
+
+    if (record?.values) {
+      console.log(
+        "🔍 [DASHBOARD] All values in record:",
+        record.values.map((v) => ({
+          metricId: v.metricId,
+          metricName: v.metric?.name,
+          amount: v.amount,
+        })),
+      );
+    }
+
+    const found = record?.values.find((v) => v.metricId === metricId);
+    console.log("🔍 [DASHBOARD] Found value:", {
+      searchingFor: metricId,
+      foundAmount: found?.amount,
+      foundMetricId: found?.metricId,
+    });
+
+    return found?.amount || 0;
   };
 
   if (loadingImpact) {
@@ -172,7 +196,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <ImpactPulse
                 score={Math.max(
                   0,
-                  Math.min(100, 100 - Number(latestRecord.totalImpact) * 2)
+                  Math.min(100, 100 - Number(latestRecord.totalImpact) * 2),
                 )}
               />
             </div>

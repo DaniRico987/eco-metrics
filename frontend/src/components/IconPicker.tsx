@@ -10,7 +10,7 @@ interface IconPickerProps {
 // Filter out non-component exports if any (though usually Lucide exports components)
 // We also exclude the "icons" export if it exists (some versions have it)
 const iconList = Object.keys(LucideIcons).filter(
-  (key) => key !== "icons" && key !== "createLucideIcon" && key !== "default"
+  (key) => key !== "icons" && key !== "createLucideIcon" && key !== "default",
 );
 
 export const IconPicker: React.FC<IconPickerProps> = ({
@@ -19,13 +19,16 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 }) => {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [itemsToShow, setItemsToShow] = useState(100);
 
   const filteredIcons = useMemo(() => {
-    if (!search) return iconList.slice(0, 100); // Show top 100 by default for perf
-    return iconList
-      .filter((name) => name.toLowerCase().includes(search.toLowerCase()))
-      .slice(0, 100); // Limit results for perf
-  }, [search]);
+    const filtered = search
+      ? iconList.filter((name) =>
+          name.toLowerCase().includes(search.toLowerCase()),
+        )
+      : iconList;
+    return filtered.slice(0, itemsToShow);
+  }, [search, itemsToShow]);
 
   // Dynamic component for the selected icon
   const SelectedIconComponent =
@@ -92,8 +95,18 @@ export const IconPicker: React.FC<IconPickerProps> = ({
               );
             })}
           </div>
-          <div className="text-xs text-center text-text-muted">
-            Mostrando {filteredIcons.length} de {iconList.length} íconos
+          <div className="space-y-2">
+            <div className="text-xs text-center text-text-muted">
+              Mostrando {filteredIcons.length} de {iconList.length} íconos
+            </div>
+            {filteredIcons.length < iconList.length && (
+              <button
+                onClick={() => setItemsToShow((prev) => prev + 100)}
+                className="w-full btn btn-secondary text-sm"
+              >
+                Ver más íconos
+              </button>
+            )}
           </div>
         </div>
       )}

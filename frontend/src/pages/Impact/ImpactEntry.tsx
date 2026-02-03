@@ -75,11 +75,10 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
     const values = activeMetrics.map((cm: CompanyMetric) => ({
       metricId: cm.metricId,
       amount:
-        typeof metricValues[cm.metricId] === "number"
-          ? metricValues[cm.metricId]
-          : metricValues[cm.metricId] === ""
-            ? 0
-            : Number(metricValues[cm.metricId]) || 0,
+        metricValues[cm.metricId] === "" ||
+        metricValues[cm.metricId] === undefined
+          ? 0
+          : Number(metricValues[cm.metricId]),
     }));
 
     await createRecord({

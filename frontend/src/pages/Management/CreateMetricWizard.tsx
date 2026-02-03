@@ -76,6 +76,16 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!unit.trim()) {
+      showError("La unidad es obligatoria");
+      return;
+    }
+    if (!description.trim()) {
+      showError("La descripción es obligatoria");
+      return;
+    }
+
     await createMetric({
       variables: {
         input: {

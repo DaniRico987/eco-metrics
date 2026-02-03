@@ -59,7 +59,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     record: ImpactRecord | undefined,
     metricId: string,
   ) => {
-    return record?.values.find((v) => v.metricId === metricId)?.amount || 0;
+    return record?.values?.find((v) => v.metricId === metricId)?.amount || 0;
   };
 
   if (loadingImpact) {

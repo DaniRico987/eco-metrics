@@ -64,6 +64,7 @@ export const GET_DASHBOARD_DATA = gql`
       createdAt
       companyMetrics {
         id
+        metricId
         metric {
           id
           name

@@ -59,31 +59,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     record: ImpactRecord | undefined,
     metricId: string,
   ) => {
-    console.log("🔍 [DASHBOARD] getMetricValue called:", {
-      metricId,
-      recordId: record?.id,
-      valuesCount: record?.values.length,
-    });
-
-    if (record?.values) {
-      console.log(
-        "🔍 [DASHBOARD] All values in record:",
-        record.values.map((v) => ({
-          metricId: v.metricId,
-          metricName: v.metric?.name,
-          amount: v.amount,
-        })),
-      );
-    }
-
-    const found = record?.values.find((v) => v.metricId === metricId);
-    console.log("🔍 [DASHBOARD] Found value:", {
-      searchingFor: metricId,
-      foundAmount: found?.amount,
-      foundMetricId: found?.metricId,
-    });
-
-    return found?.amount || 0;
+    return record?.values.find((v) => v.metricId === metricId)?.amount || 0;
   };
 
   if (loadingImpact) {

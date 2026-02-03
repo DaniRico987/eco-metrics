@@ -20,6 +20,7 @@ export const GET_IMPACT_RECORDS = gql`
       totalImpact
       values {
         id
+        metricId
         amount
         co2Equivalent
         metric {
@@ -41,6 +42,7 @@ export const GET_DASHBOARD_DATA = gql`
       totalImpact
       values {
         id
+        metricId
         amount
         co2Equivalent
         metric {

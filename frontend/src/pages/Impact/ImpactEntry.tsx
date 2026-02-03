@@ -84,8 +84,6 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
           : Number(metricValues[cm.metricId]),
     }));
 
-    console.log("🚀 [DEBUG] Submitting values:", values);
-    console.log("🚀 [DEBUG] Current metricValues state:", metricValues);
     await createRecord({
       variables: {
         data: {

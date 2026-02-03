@@ -39,7 +39,7 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
   const [color, setColor] = useState("#4ADE80");
 
   const [getSuggestions, { data: aiData, loading: aiLoading }] = useLazyQuery(
-    SUGGEST_METRIC_DETAILS
+    SUGGEST_METRIC_DETAILS,
   );
   const [createMetric, { loading: creating, error: createError }] = useMutation(
     CREATE_METRIC,
@@ -52,7 +52,7 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
         show("Métrica cancelada correctamente", "success");
         onClose();
       },
-    }
+    },
   );
 
   useEffect(() => {
@@ -274,7 +274,7 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
                 Atrás
               </button>
               <button
-                disabled={creating}
+                disabled={creating || !unit.trim() || !description.trim()}
                 onClick={handleSave}
                 className="btn btn-primary flex-1 gap-2"
               >

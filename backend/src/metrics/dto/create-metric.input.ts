@@ -8,8 +8,8 @@ export class CreateMetricInput {
   @Field()
   unit: string;
 
-  @Field({ nullable: true })
-  description?: string;
+  @Field()
+  description: string;
 
   @Field()
   icon: string;

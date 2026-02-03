@@ -39,7 +39,9 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
     year: new Date().getFullYear(),
   });
 
-  const [metricValues, setMetricValues] = useState<Record<string, number>>({});
+  const [metricValues, setMetricValues] = useState<
+    Record<string, number | string>
+  >({});
 
   const [createRecord, { loading, error }] = useMutation(CREATE_IMPACT_RECORD, {
     refetchQueries: [{ query: GET_IMPACT_RECORDS }],
@@ -57,13 +59,13 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
 
   const activeMetrics =
     companyData?.myCompany?.companyMetrics?.filter(
-      (cm: CompanyMetric) => cm.isActive
+      (cm: CompanyMetric) => cm.isActive,
     ) || [];
 
   const handleMetricChange = (metricId: string, value: string) => {
     setMetricValues((prev) => ({
       ...prev,
-      [metricId]: Number(value),
+      [metricId]: value === "" ? "" : Number(value),
     }));
   };
 
@@ -72,7 +74,12 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
 
     const values = activeMetrics.map((cm: CompanyMetric) => ({
       metricId: cm.metricId,
-      amount: metricValues[cm.metricId] || 0,
+      amount:
+        typeof metricValues[cm.metricId] === "number"
+          ? metricValues[cm.metricId]
+          : metricValues[cm.metricId] === ""
+            ? 0
+            : Number(metricValues[cm.metricId]) || 0,
     }));
 
     await createRecord({
@@ -87,7 +94,7 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -160,7 +167,7 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
                 key={cm.id}
                 label={cm.metric.name}
                 unit={cm.metric.unit}
-                value={metricValues[cm.metricId] || 0}
+                value={metricValues[cm.metricId] ?? ""}
                 onChange={(e) =>
                   handleMetricChange(cm.metricId, e.target.value)
                 }
@@ -201,7 +208,7 @@ interface MetricInputProps {
   label: string;
   unit: string;
   icon: React.ReactNode;
-  value: number;
+  value: number | string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   color: string;
 }
@@ -223,10 +230,13 @@ const MetricInput: React.FC<MetricInputProps> = ({
       <input
         required
         type="number"
-        step="0.01"
+        step="1"
+        min="0"
+        inputMode="numeric"
         className="input pr-16 text-2xl font-black"
         value={value}
         onChange={onChange}
+        placeholder="0"
       />
       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted font-bold">
         {unit}

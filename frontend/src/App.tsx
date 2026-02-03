@@ -100,10 +100,15 @@ function App() {
   if (!token) {
     return <Auth onLoginSuccess={handleLoginSuccess} />;
   }
-  const isPrivileged =
-    user?.role === Role.SUPER_ADMIN || user?.role === Role.COMPANY_MANAGER;
 
-  if (user?.status === "PENDING" && !isPrivileged) {
+  // Use fresh GraphQL data for status check instead of cached localStorage
+  const currentUser = dashboardData?.me || user;
+  const isPrivileged =
+    currentUser?.role === Role.SUPER_ADMIN ||
+    currentUser?.role === Role.COMPANY_MANAGER;
+
+  // Show pending screen if user status is PENDING (unless loading initial data)
+  if (!loadingImpact && currentUser?.status === "PENDING" && !isPrivileged) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-bg-dark">
         <motion.div
@@ -156,7 +161,7 @@ function App() {
   ];
 
   const filteredMenu = menuItems.filter((item) =>
-    item.roles.includes(user?.role || "")
+    item.roles.includes(user?.role || ""),
   );
 
   const records: ImpactRecord[] = [

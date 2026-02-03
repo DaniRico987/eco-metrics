@@ -117,7 +117,13 @@ export const Profile: React.FC<ProfileProps> = ({
             </p>
             <div className="pt-6 border-t border-white/5">
               <p className="text-text-secondary text-sm mb-4">
-                Miembro activo desde Diciembre 2025
+                Miembro activo desde{" "}
+                {company?.createdAt
+                  ? new Date(company.createdAt).toLocaleDateString("es-ES", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "fecha desconocida"}
               </p>
             </div>
           </div>

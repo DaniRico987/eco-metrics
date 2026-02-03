@@ -63,10 +63,15 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
     ) || [];
 
   const handleMetricChange = (metricId: string, value: string) => {
-    setMetricValues((prev) => ({
-      ...prev,
-      [metricId]: value === "" ? "" : Number(value),
-    }));
+    console.log("🔍 [DEBUG] Changing metric:", metricId, "to value:", value);
+    setMetricValues((prev) => {
+      const updated = {
+        ...prev,
+        [metricId]: value === "" ? "" : Number(value),
+      };
+      console.log("🔍 [DEBUG] Updated metricValues:", updated);
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,6 +86,8 @@ export const ImpactEntry: React.FC<{ onSuccess: () => void }> = ({
           : Number(metricValues[cm.metricId]),
     }));
 
+    console.log("🚀 [DEBUG] Submitting values:", values);
+    console.log("🚀 [DEBUG] Current metricValues state:", metricValues);
     await createRecord({
       variables: {
         data: {

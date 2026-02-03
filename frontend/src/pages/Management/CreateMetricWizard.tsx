@@ -284,7 +284,7 @@ export const CreateMetricWizard: React.FC<CreateMetricWizardProps> = ({
                 Atrás
               </button>
               <button
-                disabled={creating || !unit.trim() || !description.trim()}
+                disabled={creating}
                 onClick={handleSave}
                 className="btn btn-primary flex-1 gap-2"
               >

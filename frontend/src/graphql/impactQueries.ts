@@ -59,6 +59,7 @@ export const GET_DASHBOARD_DATA = gql`
       sector
       employeesCount
       isConfigured
+      createdAt
       companyMetrics {
         id
         metric {
